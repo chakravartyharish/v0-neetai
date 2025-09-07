@@ -11,7 +11,12 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@repo/ui": "*",
+    "@neet/ui": "*",
+    "@neet/database": "*",
+    "@neet/auth": "*",
+    "@neet/config": "*",
+    "@vercel/analytics": "^1.1.0",
+    "@vercel/speed-insights": "^1.0.0",
     "next": "^15.4.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
