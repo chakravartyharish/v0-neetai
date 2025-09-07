@@ -1,10 +1,16 @@
 # NEET Prep AI Platform
 
-🚀 **AI-powered NEET preparation platform** built with Next.js 14, TypeScript, Supabase, and the Vercel ecosystem.
+🚀 **India's most comprehensive and intelligent NEET preparation platform** that combines 30+ years of historical question data with cutting-edge AI technology.
 
 ## 📋 Overview
 
-NEET Prep AI is a comprehensive medical entrance exam preparation platform that leverages artificial intelligence to provide personalized learning experiences, adaptive quizzes, voice AI tutoring, and social study features.
+Building India's leading AI-powered NEET preparation platform that transforms traditional rote learning into an interactive, social, and data-driven journey. Our platform delivers personalized learning experiences, adaptive quizzes, voice AI tutoring in 8 Indian languages, AR question scanning, and collaborative study features.
+
+### 🎯 Business Objectives (PRD v3)
+- **Market Leadership**: Capture 10% of Indian NEET prep market (230,000+ active users) within 24 months
+- **Revenue Target**: Achieve ₹15 crores ARR by Year 2 through freemium subscriptions and B2B partnerships
+- **Student Impact**: Improve average student scores by 30-50% compared to traditional prep methods
+- **Innovation**: Pioneer multimodal AI (voice, vision, AR) in Indian EdTech with mobile-first approach
 
 ## 🏗️ Architecture
 
@@ -27,17 +33,19 @@ neet-prep-platform/
 
 ## ✨ Features
 
-### Core Learning Features
-- 📚 **Comprehensive Question Bank** - 20,000+ NEET questions from past 10 years
-- 🧠 **AI-Powered Explanations** - Detailed explanations using GPT-4
-- 📊 **Adaptive Learning** - IRT-based question selection
-- 🎯 **Smart Quiz Engine** - Practice, mock tests, and topic-wise quizzes
+### 🎓 Core Learning Features (Enhanced per PRD v3)
+- 📚 **Historical Intelligence** - 50,000+ NEET questions from 1988-2025 with AI-powered insights
+- 🧠 **Hyperpersonalized AI** - GPT-4o-2024-11-20 with subject-specialized fine-tuned models
+- 📊 **Predictive Analytics** - AI forecasts final NEET score with 90%+ accuracy
+- 🎯 **Adaptive Quiz Engine** - IRT-based with real-time emotional intelligence adaptation
+- 🗣️ **"NEET Buddy 3.0"** - Voice AI tutor supporting 8 Indian languages with cultural context
 
-### Advanced Features
-- 🎙️ **Voice AI Tutor** - Natural conversation-based learning
-- 📸 **AR Question Scanner** - Scan and solve physical questions
-- 👥 **Study Groups** - Collaborative learning with peers
-- 📈 **Analytics Dashboard** - Track progress and performance
+### 🚀 Advanced Features
+- 📱 **AR Scanner + Battle Mode** - Gamified competitive problem-solving with OCR
+- 👥 **AI-Powered Study Groups** - Smart matchmaking based on learning styles and performance
+- 📈 **Multi-dimensional Analytics** - Student, parent, and educator dashboards with predictive insights
+- 🎮 **Social Learning Network** - Peer tutoring, competitions, and knowledge sharing
+- 🧘 **Wellness Integration** - Stress detection, break recommendations, and biometric tracking
 
 ### Technical Features
 - ⚡ **Real-time Sync** - Live collaboration features
@@ -47,19 +55,24 @@ neet-prep-platform/
 
 ## 🛠️ Tech Stack
 
-### Frontend
-- **Framework:** Next.js 14 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS + shadcn/ui
-- **State:** Zustand + TanStack Query
-- **Animation:** Framer Motion
+### 💻 Frontend Stack (Updated per PRD v3)
+- **Framework:** Next.js 15 (App Router, Edge Runtime, Server Components)
+- **Language:** TypeScript 5.2+ (strict mode)
+- **Styling:** Tailwind CSS v4 + Radix UI + Framer Motion
+- **Mobile:** React Native 0.74 + Expo SDK 51
+- **State:** Zustand + TanStack Query v5
+- **Forms:** React Hook Form + Zod validation
 
-### Backend
-- **Database:** Supabase (PostgreSQL)
-- **Auth:** Supabase Auth
-- **AI:** OpenAI GPT-4
-- **Cache:** Vercel KV
-- **Storage:** Vercel Blob + Supabase Storage
+### 🔧 Backend & AI Stack
+- **Database:** Supabase (PostgreSQL 15 + Realtime + Storage)
+- **Primary AI:** OpenAI GPT-4o-2024-11-20
+- **Specialized Models:** Fine-tuned Physics, Chemistry, Biology experts
+- **Voice AI:** Whisper-v3 + ElevenLabs Pro
+- **Vision AI:** GPT-4o Vision + Google Vision API
+- **ML Platform:** Hugging Face + Custom PyTorch models
+- **Vector DB:** Pinecone for semantic search
+- **Cache:** Vercel KV (Redis)
+- **Search:** Typesense
 
 ### Infrastructure
 - **Hosting:** Vercel
@@ -218,14 +231,79 @@ Set the following in Vercel dashboard:
 - All variables from `.env.example`
 - Different values for staging/production
 
-## 📊 Development Phases
+## 👥 Target Users (PRD v3)
 
-- ✅ **Phase 1:** Foundation & Setup (Complete)
-- 🚧 **Phase 2:** Core Learning Features (In Progress)
-- 📅 **Phase 3:** Advanced Features
-- 📅 **Phase 4:** Enterprise & Analytics
-- 📅 **Phase 5:** Optimization & Scaling
-- 📅 **Phase 6:** Production Launch
+### Primary: Arjun - The Determined Aspirant
+- **Profile**: 17-year-old Class 12 student from Tier-2 city
+- **Goal**: Score 650+ in NEET, admission to government medical college
+- **Budget**: ₹3,000-8,000/month for digital learning tools
+- **Tech**: Primary smartphone user (Android) with 4G/5G
+
+### Secondary: Priya - The Working Student
+- **Profile**: 19-year-old gap year student, second NEET attempt
+- **Goal**: Improve from 480 to 620+ score
+- **Budget**: ₹2,000-5,000/month for comprehensive prep tools
+
+### Tertiary: Coach Sharma - The Modern Educator
+- **Profile**: 42-year-old coaching institute owner in Tier-2 city
+- **Goal**: Improve student success rates and differentiate institute
+- **Budget**: ₹50,000-2,00,000 annually for institutional solutions
+
+## 💰 Monetization Strategy (PRD v3)
+
+### Freemium Tiers
+- **Free**: 100 questions/day, 2 mock tests/month, 10 AI explanations/day
+- **Premium (₹199/month)**: Unlimited questions, advanced voice AI, AR features, parent dashboard
+- **Premium Plus (₹399/month)**: One-on-one mentorship, expert doubt clearing, career guidance
+
+### Revenue Projections
+- **Year 1**: ₹3.4 crores (50K users, 20% conversion)
+- **Year 2**: ₹11.3 crores (150K users, 25% conversion)
+- **Year 3**: ₹25.5 crores (300K users, 30% conversion)
+
+### B2B Revenue
+- **Coaching Institutes**: ₹5L setup + ₹99/student/month
+- **Schools**: ₹2L annual license for unlimited students
+- **API Licensing**: ₹50K/month for question bank and AI APIs
+
+## 🎯 Success Metrics (PRD v3)
+
+### Educational Impact
+- **Score Improvement**: 40% average improvement in mock tests within 3 months
+- **NEET Prediction Accuracy**: 90% accuracy within ±25 points
+- **Student Engagement**: 75+ minutes average session time
+- **Retention**: 90% monthly retention for premium users
+
+### Technical Performance
+- **API Latency**: <100ms (95th percentile)
+- **Page Load**: <1.5s (First Contentful Paint)
+- **Uptime**: 99.99% availability
+- **Scale**: Support 100,000+ concurrent users
+
+## 📊 Development Phases (PRD v3 Updated)
+
+### Phase 1: Foundation (Months 1-3) ✅ Complete
+- Enhanced monorepo with 15,000 questions
+- Basic AI integration (GPT-4o explanations)
+- Mobile-first PWA with offline capabilities
+
+### Phase 2: AI Enhancement (Months 4-6) 🚧 In Progress  
+- Voice AI tutor with 8 language support
+- AR question scanner with battle mode
+- Predictive analytics (85%+ accuracy)
+- Advanced study group formation
+
+### Phase 3: Market Expansion (Months 7-9)
+- B2B features and white-labeling
+- Regional language UI/UX (8 Indian languages)
+- Biometric integration and wellness tracking
+- Local payment methods (UPI, wallets)
+
+### Phase 4: Scale & Optimization (Months 10-12)
+- 100,000+ concurrent user support
+- Sub-100ms API response times
+- VR learning modules
+- International expansion (Southeast Asia)
 
 ## 🤝 Contributing
 
