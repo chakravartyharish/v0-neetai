@@ -1,0 +1,13 @@
+{
+  "name": "@neet/utils",
+  "version": "0.0.0",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts"
+  },
+  "dependencies": {
+    "clsx": "^2.0.0",
+    "tailwind-merge": "^2.0.0"
+  }
+}

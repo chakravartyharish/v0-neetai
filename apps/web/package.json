@@ -15,11 +15,21 @@
     "@neet/database": "*",
     "@neet/auth": "*",
     "@neet/config": "*",
+    "@neet/ai": "*",
     "@vercel/analytics": "^1.1.0",
     "@vercel/speed-insights": "^1.0.0",
+    "@vercel/ai": "^3.0.0",
+    "@vercel/kv": "^1.0.0",
+    "@vercel/blob": "^0.15.0",
+    "@ai-sdk/openai": "^0.0.0",
+    "ai": "^3.0.0",
+    "openai": "^4.0.0",
+    "zod": "^3.22.0",
     "next": "^15.4.2",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "react-hook-form": "^7.48.0",
+    "@hookform/resolvers": "^3.3.0"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^15.4.6",

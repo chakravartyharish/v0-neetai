@@ -32,34 +32,106 @@ export interface Database {
       }
       neet_questions: {
         Row: {
-          id: number
+          id: string
           year: number
+          exam_type: 'NEET' | 'AIPMT' | 'AIIMS'
           subject: 'Physics' | 'Chemistry' | 'Biology'
           chapter: string
           topic: string
+          subtopic: string | null
           question_text: string
-          options: Record<string, string>
+          question_image: string | null
+          options: {
+            A: string
+            B: string
+            C: string
+            D: string
+          }
           correct_option: 'A' | 'B' | 'C' | 'D'
-          explanation: string
-          difficulty_level: number
+          explanation: {
+            text: string
+            video_url?: string
+            diagram_url?: string
+            mnemonic_tip?: string
+          }
+          difficulty: {
+            level: number // 1-5 scale
+            dynamic_rating: number // Updated based on user performance
+            cognitive_load: 'low' | 'medium' | 'high'
+          }
+          analytics: {
+            average_solve_time: number
+            global_success_rate: number
+            attempt_count: number
+            common_mistakes: string[]
+            expert_insights: string[]
+          }
           concept_tags: string[]
-          metadata: Record<string, any> | null
+          ncert_reference: {
+            class: 11 | 12
+            chapter: string
+            page_number?: number
+          }
+          related_questions: string[] // Similar concepts
+          trending_score: number // Relevance for current year
+          language_support: string[] // Available explanation languages
+          accessibility: {
+            audio_description?: string
+            screen_reader_friendly: boolean
+          }
           created_at: string
+          updated_at: string
         }
         Insert: {
-          id?: number
+          id?: string
           year: number
+          exam_type: 'NEET' | 'AIPMT' | 'AIIMS'
           subject: 'Physics' | 'Chemistry' | 'Biology'
           chapter: string
           topic: string
+          subtopic?: string | null
           question_text: string
-          options: Record<string, string>
+          question_image?: string | null
+          options: {
+            A: string
+            B: string
+            C: string
+            D: string
+          }
           correct_option: 'A' | 'B' | 'C' | 'D'
-          explanation: string
-          difficulty_level?: number
+          explanation: {
+            text: string
+            video_url?: string
+            diagram_url?: string
+            mnemonic_tip?: string
+          }
+          difficulty?: {
+            level: number
+            dynamic_rating: number
+            cognitive_load: 'low' | 'medium' | 'high'
+          }
+          analytics?: {
+            average_solve_time: number
+            global_success_rate: number
+            attempt_count: number
+            common_mistakes: string[]
+            expert_insights: string[]
+          }
           concept_tags?: string[]
-          metadata?: Record<string, any> | null
+          ncert_reference?: {
+            class: 11 | 12
+            chapter: string
+            page_number?: number
+          }
+          related_questions?: string[]
+          trending_score?: number
+          language_support?: string[]
+          accessibility?: {
+            audio_description?: string
+            screen_reader_friendly: boolean
+          }
           created_at?: string
+          updated_at?: string
         }
         Update: Partial<Database['public']['Tables']['neet_questions']['Insert']>
       }

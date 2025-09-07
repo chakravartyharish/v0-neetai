@@ -1,0 +1,15 @@
+{
+  "name": "@neet/analytics",
+  "version": "0.0.0",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./services": "./services/index.ts"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^1.1.0",
+    "@neet/database": "*",
+    "@neet/types": "*"
+  }
+}
