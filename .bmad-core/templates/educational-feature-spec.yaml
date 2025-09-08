@@ -1,0 +1,346 @@
+template:
+  id: educational-feature-spec
+  name: Educational Feature Specification
+  version: 1.0
+  output:
+    format: markdown
+  metadata:
+    domain: education
+    exam_type: neet
+    user_types: [students, parents, coaches]
+    subjects: [physics, chemistry, biology]
+
+workflow:
+  interactionMode: guided
+  sections:
+    - educational_overview
+    - learning_objectives
+    - user_stories
+    - technical_requirements
+    - educational_requirements
+    - accessibility
+    - success_metrics
+
+variables:
+  feature_name:
+    type: string
+    description: Name of the educational feature
+    required: true
+  
+  neet_subjects:
+    type: array
+    description: NEET subjects this feature applies to
+    options: [physics, chemistry, biology, general]
+    default: [general]
+  
+  difficulty_levels:
+    type: array
+    description: Difficulty levels supported
+    options: [beginner, intermediate, advanced, neet_level]
+    default: [intermediate, neet_level]
+  
+  user_personas:
+    type: array
+    description: Primary user personas for this feature
+    options: [neet_aspirant, repeat_aspirant, parent, coach, admin]
+    required: true
+  
+  learning_methodologies:
+    type: array
+    description: Educational methodologies used
+    options: [spaced_repetition, active_recall, adaptive_learning, gamification, peer_learning]
+    default: [active_recall]
+  
+  mobile_optimization:
+    type: boolean
+    description: Requires mobile-first optimization
+    default: true
+  
+  ai_integration:
+    type: boolean
+    description: Includes AI-powered features
+    default: false
+
+sections:
+  - id: educational_overview
+    title: Educational Feature Overview
+    instruction: |
+      Provide a comprehensive overview of this educational feature from a pedagogical perspective.
+      
+      **Focus Areas:**
+      - Learning impact for NEET preparation
+      - Educational methodology alignment
+      - Student engagement considerations
+      - Integration with existing curriculum
+      
+      **Context:** {{feature_name}} for {{neet_subjects}} targeting {{user_personas}}
+    
+    variables_used: [feature_name, neet_subjects, user_personas]
+    
+  - id: learning_objectives
+    title: Learning Objectives & Educational Goals
+    instruction: |
+      Define specific, measurable learning objectives for this feature.
+      
+      **Required Sections:**
+      1. **Primary Learning Objectives** (3-5 specific, measurable outcomes)
+      2. **NEET Curriculum Alignment** (specific topics/chapters covered)
+      3. **Cognitive Learning Levels** (Knowledge/Comprehension/Application/Analysis)
+      4. **Expected Learning Outcomes** (what students will achieve)
+      5. **Assessment Methods** (how learning will be measured)
+      
+      **Template for each objective:**
+      - Students will be able to [specific action verb] [specific content] [under specific conditions] [to specific standard]
+    
+    variables_used: [neet_subjects, difficulty_levels, learning_methodologies]
+    
+  - id: user_stories
+    title: Educational User Stories
+    instruction: |
+      Create user stories from educational stakeholder perspectives.
+      
+      **Format for each story:**
+      ```
+      **As a** [user_persona]
+      **I want** [specific functionality]
+      **So that** [educational benefit/outcome]
+      
+      **Educational Context:**
+      - Learning objective served: [objective]
+      - NEET relevance: [how it helps with NEET preparation]
+      - Success criteria: [measurable outcomes]
+      ```
+      
+      **Required User Stories:**
+      {{#each user_personas}}
+      - At least 2 stories for {{this}}
+      {{/each}}
+      
+      **Story Categories:**
+      1. Core Learning Stories
+      2. Assessment & Practice Stories  
+      3. Progress Tracking Stories
+      4. Motivational/Engagement Stories
+    
+    repeatable: true
+    variables_used: [user_personas, feature_name]
+    
+  - id: technical_requirements
+    title: Technical Requirements & Implementation
+    instruction: |
+      Define technical specifications with educational platform considerations.
+      
+      **Required Sections:**
+      
+      1. **Functional Requirements**
+         - Core feature functionality
+         - Educational content management
+         - User interaction patterns
+         - Data collection and analytics
+      
+      2. **Performance Requirements**
+         - Response time: < 2 seconds for educational interactions
+         - Mobile performance: Works on Android 8+ devices
+         - Offline capability: {{#if mobile_optimization}}Core features available offline{{else}}Not required{{/if}}
+         - Concurrent users: Support 10,000+ during peak study hours
+      
+      3. **Integration Requirements**
+         - Learning Management System integration
+         - Progress tracking integration
+         - {{#if ai_integration}}AI service integration{{/if}}
+         - Analytics platform integration
+      
+      4. **Security Requirements**
+         - Student data protection (COPPA compliance)
+         - Secure authentication
+         - Privacy protection measures
+    
+    variables_used: [mobile_optimization, ai_integration]
+    
+  - id: educational_requirements
+    title: Educational Quality & Content Requirements
+    instruction: |
+      Specify educational quality standards and content requirements.
+      
+      **Content Quality Standards:**
+      1. **Accuracy Requirements**
+         - 100% factual accuracy verified by subject matter experts
+         - Alignment with NCERT curriculum
+         - Cross-referenced with authoritative NEET preparation materials
+         - Regular content review and updates
+      
+      2. **Pedagogical Standards**
+         - Based on evidence-based learning methodologies: {{learning_methodologies}}
+         - Age-appropriate content for 16-19 year olds
+         - Cultural sensitivity for Indian education context
+         - Progressive difficulty scaling
+      
+      3. **NEET Preparation Standards**
+         - Alignment with official NEET syllabus
+         - Incorporation of previous year question patterns
+         - Difficulty level matching: {{difficulty_levels}}
+         - Time management skill development
+      
+      4. **Content Accessibility**
+         - Available in English and Hindi
+         - Support for different learning styles (visual, auditory, kinesthetic)
+         - Accommodations for learning disabilities
+         - Mobile-optimized content delivery
+      
+      5. **Engagement Requirements**
+         - Interactive elements to maintain attention
+         - Immediate feedback on student responses
+         - Progress visualization and achievement systems
+         - Social learning opportunities where appropriate
+    
+    variables_used: [learning_methodologies, difficulty_levels, neet_subjects]
+    
+  - id: accessibility
+    title: Accessibility & Inclusive Design
+    instruction: |
+      Define accessibility requirements for diverse learners.
+      
+      **Accessibility Standards:**
+      
+      1. **Technical Accessibility (WCAG 2.1 AA)**
+         - Screen reader compatibility
+         - Keyboard navigation support
+         - High contrast mode support
+         - Text scaling support (up to 200%)
+         - Alternative text for images and diagrams
+      
+      2. **Educational Accessibility**
+         - Multiple representation of content (text, audio, visual)
+         - Adjustable reading speed and complexity
+         - Support for different learning paces
+         - Multiple input methods (text, voice, touch)
+      
+      3. **Cultural Accessibility**
+         - Language support: English and Hindi interface
+         - Cultural context in examples and scenarios
+         - Regional exam pattern adaptations
+         - Economic accessibility considerations
+      
+      4. **Device Accessibility**
+         - Works on low-end Android devices (2GB RAM minimum)
+         - Optimized for 3G network connections
+         - Offline functionality for areas with poor connectivity
+         - Battery-efficient operation
+      
+      5. **Learning Accessibility**
+         - Support for visual, auditory, and kinesthetic learners
+         - Adjustable cognitive load
+         - Multiple difficulty progression paths
+         - Accommodations for attention and memory differences
+    
+    variables_used: [mobile_optimization]
+    
+  - id: success_metrics
+    title: Success Metrics & Educational KPIs
+    instruction: |
+      Define measurable success criteria for educational effectiveness.
+      
+      **Educational Outcome Metrics:**
+      
+      1. **Learning Effectiveness**
+         - Concept mastery rate: >80% of students achieve proficiency
+         - Knowledge retention: >85% after 30 days
+         - Skill transfer: >75% apply learning to new problems
+         - Learning speed: 20-30% faster than traditional methods
+      
+      2. **NEET Preparation Impact**
+         - Practice test score improvement: +15-25 marks average
+         - Topic confidence increase: >70% report improved confidence
+         - Mock test performance: Consistent improvement over time
+         - Prediction accuracy: Within ±10 marks of actual NEET score
+      
+      3. **Engagement Metrics**
+         - Session duration: 45-60 minutes average
+         - Feature adoption: >70% of users engage with core features
+         - Return rate: >85% monthly retention
+         - Completion rate: >80% of started activities completed
+      
+      4. **User Satisfaction**
+         - Student satisfaction: >4.5/5 rating
+         - Parent satisfaction: >80% report visible progress
+         - Net Promoter Score: >70
+         - Feature usefulness rating: >4.0/5
+      
+      5. **Technical Performance**
+         - Page load time: <2 seconds on 3G
+         - Error rate: <1% of user interactions
+         - Uptime: >99.5% availability
+         - Mobile performance: >4.0 app store rating
+      
+      **Measurement Timeline:**
+      - Week 1: Initial user engagement and technical performance
+      - Month 1: Learning engagement and basic satisfaction metrics
+      - Month 3: Learning effectiveness and knowledge retention
+      - Month 6: NEET preparation impact and long-term outcomes
+    
+    variables_used: [feature_name, neet_subjects]
+
+conditional_sections:
+  - condition: "{{ai_integration}}"
+    sections:
+      - id: ai_requirements
+        title: AI Integration Requirements
+        instruction: |
+          Specify AI-powered educational features and requirements.
+          
+          **AI Feature Specifications:**
+          
+          1. **Educational AI Capabilities**
+             - Personalized learning path generation
+             - Adaptive difficulty adjustment
+             - Intelligent tutoring and explanation
+             - Performance prediction and forecasting
+          
+          2. **AI Model Requirements**
+             - Primary model: GPT-4o for complex reasoning
+             - Fallback model: GPT-4o-mini for cost optimization
+             - Response time: <3 seconds for explanations
+             - Accuracy: >90% for educational content generation
+          
+          3. **AI Safety & Quality**
+             - Content accuracy verification
+             - Bias detection and mitigation
+             - Age-appropriate response filtering
+             - Educational value validation
+          
+          4. **AI Integration Points**
+             - Real-time doubt resolution
+             - Automated content generation
+             - Personalization algorithms
+             - Performance analytics
+
+validation:
+  required_sections: [educational_overview, learning_objectives, user_stories, technical_requirements, educational_requirements, accessibility, success_metrics]
+  
+  educational_validation:
+    - verify_learning_objectives: "All learning objectives must be specific, measurable, and aligned with NEET curriculum"
+    - verify_neet_alignment: "Feature must clearly support NEET preparation goals"
+    - verify_user_personas: "At least one primary user persona must be defined"
+    - verify_accessibility: "Accessibility requirements must meet WCAG 2.1 AA standards"
+    - verify_success_metrics: "Success metrics must be measurable and educationally relevant"
+
+output_format: |
+  # {{feature_name}} - Educational Feature Specification
+  
+  **Domain:** Medical Entrance Exam Preparation (NEET)
+  **Subjects:** {{neet_subjects}}
+  **Target Users:** {{user_personas}}
+  **Difficulty Levels:** {{difficulty_levels}}
+  **Learning Methodologies:** {{learning_methodologies}}
+  
+  ---
+  
+  [Generated sections will appear here based on workflow completion]
+  
+  ---
+  
+  **Document Metadata:**
+  - Created: {{current_date}}
+  - Template: Educational Feature Specification v1.0
+  - Stakeholder Review Required: Product Manager, Education Expert, Technical Lead
+  - Next Steps: Technical design document, UI/UX mockups, development planning

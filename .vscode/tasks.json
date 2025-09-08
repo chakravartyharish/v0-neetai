@@ -1,0 +1,521 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "BMAD: Generate Educational Story",
+      "type": "shell",
+      "command": "@neet-education-expert",
+      "args": [
+        "*draft",
+        "${input:storyType}"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "detail": "Generate a new educational user story using NEET Education Expert agent"
+    },
+    {
+      "label": "BMAD: Review Educational Code",
+      "type": "shell",
+      "command": "@qa",
+      "args": [
+        "*review",
+        "${file}"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "detail": "Run QA review on current file with educational context"
+    },
+    {
+      "label": "BMAD: Generate Educational Feature PRD",
+      "type": "shell",
+      "command": "@edtech-product-manager",
+      "args": [
+        "*create-prd",
+        "${input:featureType}"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "detail": "Generate Product Requirements Document for educational features"
+    },
+    {
+      "label": "BMAD: Design AI Learning Algorithm",
+      "type": "shell",
+      "command": "@neet-ai-specialist",
+      "args": [
+        "*design-algorithm",
+        "${input:algorithmType}"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "detail": "Design AI algorithms for personalized learning"
+    },
+    {
+      "label": "BMAD: Validate Educational Content",
+      "type": "shell",
+      "command": "@neet-education-expert",
+      "args": [
+        "*validate-content",
+        "${fileDirname}/${fileBasename}"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "detail": "Validate educational content for NEET compliance and accuracy"
+    },
+    {
+      "label": "BMAD: Update Documentation",
+      "type": "shell",
+      "command": "@architect",
+      "args": [
+        "*update-docs"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "silent"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "detail": "Update project documentation with latest changes"
+    },
+    {
+      "label": "Educational Platform: Start Development Server",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "dev"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "group": "servers"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": {
+        "owner": "typescript",
+        "source": "ts",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "\\s*(?:ERROR|ERROR in)\\s*(?:.*?)([^\\s].*?):(\\d+):(\\d+)(?::(\\d+))?\\s*(.*)$",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "endColumn": 4,
+          "message": 5
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*compilation starting.*",
+          "endsPattern": ".*(?:compilation complete|Failed to compile).*"
+        }
+      },
+      "detail": "Start all apps in the Turbo monorepo for development"
+    },
+    {
+      "label": "Educational Platform: Build All Apps",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "build"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        "$tsc",
+        "$eslint-stylish"
+      ],
+      "detail": "Build all applications and packages in the monorepo"
+    },
+    {
+      "label": "Educational Platform: Run Tests",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "test"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "detail": "Run all tests across the educational platform"
+    },
+    {
+      "label": "Educational Platform: Lint Code",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "lint"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        "$eslint-stylish"
+      ],
+      "detail": "Lint all code for educational platform standards"
+    },
+    {
+      "label": "Educational Platform: Type Check",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "check-types"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [
+        "$tsc"
+      ],
+      "detail": "Run TypeScript type checking across all packages"
+    },
+    {
+      "label": "Educational Database: Generate Types",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "db:generate"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "detail": "Generate TypeScript types from Supabase database schema"
+    },
+    {
+      "label": "Educational Database: Run Migrations",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "db:migrate"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "detail": "Run pending database migrations for educational platform"
+    },
+    {
+      "label": "NEET Content: Validate Question Bank",
+      "type": "shell",
+      "command": "@neet-education-expert",
+      "args": [
+        "*validate-questions",
+        "data/questions/"
+      ],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "detail": "Validate NEET question bank for accuracy and compliance"
+    },
+    {
+      "label": "AI Models: Optimize Educational Prompts",
+      "type": "shell",
+      "command": "@neet-ai-specialist",
+      "args": [
+        "*optimize-prompts"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "detail": "Optimize AI prompts for educational effectiveness",
+      "problemMatcher": []
+    },
+    {
+      "label": "Mobile App: Start Development",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "run",
+        "dev",
+        "--filter=mobile"
+      ],
+      "group": "build",
+      "isBackground": true,
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "group": "mobile"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "detail": "Start mobile app development server"
+    },
+    {
+      "label": "Educational Analytics: Process Learning Data",
+      "type": "shell",
+      "command": "@dev",
+      "args": [
+        "*process-analytics"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "dedicated"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "detail": "Process learning analytics data for insights"
+    },
+    {
+      "label": "Package Management: Install Dependencies",
+      "type": "shell",
+      "command": "npm",
+      "args": [
+        "install"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "detail": "Install all dependencies for the educational platform"
+    }
+  ],
+  "inputs": [
+    {
+      "id": "storyType",
+      "description": "Type of educational story to generate",
+      "type": "pickString",
+      "options": [
+        {
+          "label": "Authentication Feature",
+          "value": "auth-feature"
+        },
+        {
+          "label": "Learning Content Feature",
+          "value": "learning-feature"
+        },
+        {
+          "label": "AI-Powered Feature",
+          "value": "ai-feature"
+        },
+        {
+          "label": "Assessment Feature",
+          "value": "assessment-feature"
+        },
+        {
+          "label": "Mobile Learning Feature",
+          "value": "mobile-feature"
+        },
+        {
+          "label": "Analytics Feature",
+          "value": "analytics-feature"
+        },
+        {
+          "label": "Gamification Feature",
+          "value": "gamification-feature"
+        },
+        {
+          "label": "Bug Fix",
+          "value": "bug-fix"
+        },
+        {
+          "label": "Performance Improvement",
+          "value": "performance"
+        },
+        {
+          "label": "Accessibility Enhancement",
+          "value": "accessibility"
+        }
+      ]
+    },
+    {
+      "id": "featureType",
+      "description": "Type of educational feature for PRD",
+      "type": "pickString",
+      "options": [
+        {
+          "label": "Core Learning Feature",
+          "value": "core-learning"
+        },
+        {
+          "label": "AI Tutoring System",
+          "value": "ai-tutoring"
+        },
+        {
+          "label": "Adaptive Assessment",
+          "value": "adaptive-assessment"
+        },
+        {
+          "label": "Social Learning Feature",
+          "value": "social-learning"
+        },
+        {
+          "label": "Progress Tracking",
+          "value": "progress-tracking"
+        },
+        {
+          "label": "Content Management",
+          "value": "content-management"
+        },
+        {
+          "label": "Mobile Optimization",
+          "value": "mobile-optimization"
+        }
+      ]
+    },
+    {
+      "id": "algorithmType",
+      "description": "Type of AI algorithm to design",
+      "type": "pickString",
+      "options": [
+        {
+          "label": "Personalized Recommendation",
+          "value": "recommendation"
+        },
+        {
+          "label": "Difficulty Adaptation",
+          "value": "difficulty-adaptation"
+        },
+        {
+          "label": "Knowledge Tracing",
+          "value": "knowledge-tracing"
+        },
+        {
+          "label": "Performance Prediction",
+          "value": "performance-prediction"
+        },
+        {
+          "label": "Content Generation",
+          "value": "content-generation"
+        },
+        {
+          "label": "Learning Path Optimization",
+          "value": "learning-path"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,192 @@
+{
+  // BMAD Method Integration
+  "bmad.enabled": true,
+  "bmad.autoStoryGeneration": true,
+  "bmad.agentProfiles": ".bmad-core/agents/",
+  "bmad.storyTemplates": ".bmad-core/templates/",
+  "bmad.workflowIntegration": true,
+  "bmad.educationalContext": {
+    "domain": "medical-entrance-exam-preparation",
+    "target_exam": "NEET",
+    "user_demographics": "indian-students-16-19",
+    "subjects": ["physics", "chemistry", "biology"],
+    "languages": ["english", "hindi"]
+  },
+
+  // File Associations
+  "files.associations": {
+    "*.bmad.md": "markdown",
+    "*.neet.yaml": "yaml",
+    "*.edu.json": "jsonc"
+  },
+
+  // Markdown Extensions for Documentation
+  "markdown.extension.toc.levels": "2..6",
+  "markdown.extension.preview.autoShowPreviewToSide": true,
+  "markdown.extension.list.indentationSize": "adaptive",
+
+  // TypeScript Configuration for Educational Platform
+  "typescript.preferences.importModuleSpecifier": "relative",
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "typescript.suggest.completeFunctionCalls": true,
+  "typescript.inlayHints.parameterNames.enabled": "literals",
+  "typescript.inlayHints.parameterTypes.enabled": true,
+  "typescript.inlayHints.variableTypes.enabled": true,
+
+  // Turbo Monorepo Support
+  "turbo.useLocalTurbo": true,
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+
+  // ESLint Configuration for Educational Code Quality
+  "eslint.workingDirectories": [
+    "apps/web",
+    "apps/mobile",
+    "apps/admin",
+    "apps/coach",
+    "packages/*"
+  ],
+  "eslint.codeActionsOnSave.mode": "problems",
+
+  // Educational Code Quality Rules
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit",
+    "source.organizeImports": "explicit",
+    "source.removeUnusedImports": "explicit"
+  },
+
+  // Accessibility and Inclusive Design
+  "accessibility.signals.lineHasBreakpoint": {
+    "sound": "on"
+  },
+  "accessibility.signals.lineHasError": {
+    "sound": "on"
+  },
+
+  // Git Integration for Educational Development
+  "git.enableCommitSigning": false,
+  "git.confirmSync": false,
+  "git.autofetch": true,
+  "git.suggestSmartCommit": false,
+
+  // Educational Platform Specific Settings
+  "emmet.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascriptreact"
+  },
+
+  // Search and Replace for Educational Content
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.next": true,
+    "**/.turbo": true
+  },
+
+  // File Explorer for Monorepo Structure
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "*.ts": "${capture}.js",
+    "*.js": "${capture}.js.map, ${capture}.min.js, ${capture}.d.ts",
+    "*.jsx": "${capture}.js",
+    "*.tsx": "${capture}.ts",
+    "tsconfig.json": "tsconfig.*.json",
+    "package.json": "package-lock.json, yarn.lock, pnpm-lock.yaml, bun.lockb",
+    "tailwind.config.*": "tailwind.config.*, postcss.config.*"
+  },
+
+  // Educational Development Workflow
+  "terminal.integrated.defaultProfile.linux": "bash",
+  "terminal.integrated.cwd": "${workspaceFolder}",
+
+  // Code Formatting for Educational Platform
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": true,
+
+  // Educational Content Validation
+  "spellright.language": ["en", "hi"],
+  "spellright.documentTypes": ["markdown", "latex", "plaintext", "yaml"],
+
+  // Performance Optimization for Large Educational Codebase
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/tmp/**": true,
+    "**/.next/**": true,
+    "**/.turbo/**": true,
+    "**/dist/**": true,
+    "**/build/**": true
+  },
+
+  // Educational Platform Theme and UI
+  "workbench.colorTheme": "Default High Contrast",
+  "workbench.iconTheme": "vscode-icons",
+  "editor.minimap.enabled": true,
+  "editor.lineNumbers": "on",
+  "editor.rulers": [80, 120],
+
+  // NEET Preparation Development Specific
+  "css.validate": true,
+  "less.validate": true,
+  "scss.validate": true,
+
+  // Mobile Development for Educational App
+  "react-native-tools.showUserTips": false,
+  "react-native-tools.packager.port": 8081,
+
+  // Educational Database and API Development
+  "sqltools.useNodeRuntime": true,
+
+  // Educational AI Integration Settings
+  "github.copilot.enable": {
+    "*": true,
+    "yaml": true,
+    "plaintext": false,
+    "markdown": true,
+    "json": true,
+    "jsonc": true,
+    "typescript": true,
+    "typescriptreact": true,
+    "javascript": true,
+    "javascriptreact": true
+  },
+
+  // Educational Platform Security
+  "security.workspace.trust.untrustedFiles": "prompt",
+  "security.workspace.trust.enabled": true,
+
+  // Educational Content Management
+  "files.autoSave": "afterDelay",
+  "files.autoSaveDelay": 1000,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+
+  // Educational Development Extensions
+  "extensions.ignoreRecommendations": false,
+
+  // Educational Platform Debugging
+  "debug.allowBreakpointsEverywhere": true,
+  "debug.inlineValues": "on",
+  "debug.showBreakpointsInOverviewRuler": true,
+
+  // Educational AI Development
+  "ai.completion.enabled": true,
+  "ai.completion.model": "gpt-4o",
+  "ai.educational_context": {
+    "focus_areas": [
+      "student_engagement",
+      "learning_outcomes",
+      "accessibility",
+      "mobile_optimization",
+      "indian_education_context"
+    ]
+  }
+}
