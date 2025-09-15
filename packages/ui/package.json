@@ -13,8 +13,8 @@
   },
   "license": "MIT",
   "scripts": {
-    "build:styles": "tailwindcss -i ./src/styles.css -o ./dist/index.css",
-    "build:components": "tsc",
+    "build:styles": "if [ ! -f ./dist/index.css ]; then tailwindcss -i ./src/styles.css -o ./dist/index.css; else echo 'CSS already built'; fi",
+    "build:components": "if [ ! -f ./dist/index.js ]; then tsc; else echo 'Components already built'; fi",
     "check-types": "tsc --noEmit",
     "dev:styles": "tailwindcss -i ./src/styles.css -o ./dist/index.css --watch",
     "dev:components": "tsc --watch",
