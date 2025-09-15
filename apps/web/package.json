@@ -11,24 +11,24 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
-    "@neet/ui": "*",
-    "@neet/database": "*",
+    "@ai-sdk/openai": "^0.0.0",
+    "@hookform/resolvers": "^3.3.0",
+    "@neet/ai": "*",
     "@neet/auth": "*",
     "@neet/config": "*",
-    "@neet/ai": "*",
+    "@neet/database": "*",
+    "@neet/ui": "*",
     "@vercel/analytics": "^1.1.0",
-    "@vercel/speed-insights": "^1.0.0",
-    "@vercel/kv": "^1.0.0",
     "@vercel/blob": "^0.15.0",
-    "@ai-sdk/openai": "^0.0.0",
+    "@vercel/kv": "^1.0.0",
+    "@vercel/speed-insights": "^1.0.0",
     "ai": "^3.0.0",
-    "openai": "^4.0.0",
-    "zod": "^3.22.0",
     "next": "^15.4.2",
+    "openai": "^4.0.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-hook-form": "^7.48.0",
-    "@hookform/resolvers": "^3.3.0"
+    "zod": "^3.22.0"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^15.4.6",
@@ -36,13 +36,13 @@
     "@repo/tailwind-config": "*",
     "@repo/typescript-config": "*",
     "@tailwindcss/postcss": "^4.1.5",
-    "@types/node": "^22.15.30",
-    "@types/react": "^19.1.0",
-    "@types/react-dom": "^19.1.1",
+    "@types/node": "^22.18.3",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.33.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.1.5",
-    "typescript": "5.9.2"
+    "typescript": "^5.9.2"
   }
 }
