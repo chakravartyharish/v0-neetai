@@ -2,9 +2,6 @@ import "@repo/ui/styles.css";
 import "./globals.css";
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
-import { AuthProvider } from '@neet/auth';
-import { ConditionalGuard } from '../components/auth/conditional-guard';
-import { ErrorBoundary } from '../components/error-boundary';
 
 const geist = Geist({ subsets: ["latin"] });
 
@@ -21,13 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={geist.className}>
-        <ErrorBoundary>
-          <AuthProvider>
-            <ConditionalGuard>
-              {children}
-            </ConditionalGuard>
-          </AuthProvider>
-        </ErrorBoundary>
+        {children}
       </body>
     </html>
   );

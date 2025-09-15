@@ -4,7 +4,7 @@
 'use client';
 
 import React, { createContext, useCallback, useEffect, useState } from 'react';
-import { createClientSupabase, handleAuthError, authEvents } from '../utils/supabase';
+import { createClientSupabase, handleAuthError, authEvents } from '../utils/client-supabase';
 import { 
   AuthUser, 
   AuthContextType, 

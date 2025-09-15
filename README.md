@@ -1,5 +1,11 @@
 # NEET Prep AI Platform
 
+[![Build Status](https://github.com/chakravartyharish/NEETAI/workflows/🔄%20Pull%20Request%20CI/badge.svg)](https://github.com/chakravartyharish/NEETAI/actions/workflows/pr.yml)
+[![Security](https://github.com/chakravartyharish/NEETAI/workflows/🔒%20CodeQL%20Security%20Analysis/badge.svg)](https://github.com/chakravartyharish/NEETAI/actions/workflows/codeql.yml)
+[![Deploy](https://github.com/chakravartyharish/NEETAI/workflows/🚀%20Deploy/badge.svg)](https://github.com/chakravartyharish/NEETAI/actions/workflows/deploy.yml)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-v1.0.0-blue.svg)](https://github.com/chakravartyharish/NEETAI/releases)
+
 🚀 **India's most comprehensive and intelligent NEET preparation platform** that combines 30+ years of historical question data with cutting-edge AI technology.
 
 ## 📋 Overview

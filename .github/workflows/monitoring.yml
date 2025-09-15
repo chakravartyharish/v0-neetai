@@ -1,0 +1,557 @@
+name: 📊 Monitoring & Alerts
+
+on:
+  workflow_run:
+    workflows: ["🚀 Deploy", "🔄 Pull Request CI", "🔒 CodeQL Security Analysis"]
+    types: [completed]
+  schedule:
+    # Weekly metrics report every Monday at 8 AM UTC
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+    inputs:
+      report_type:
+        description: 'Type of report to generate'
+        required: true
+        default: 'weekly'
+        type: choice
+        options:
+          - weekly
+          - monthly
+          - custom
+
+permissions:
+  actions: read
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  # Monitor workflow failures and send alerts
+  workflow-failure-alert:
+    name: ⚠️ Workflow Failure Alert
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure'
+    steps:
+      - name: Create failure issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const workflowName = '${{ github.event.workflow_run.name }}';
+            const workflowUrl = '${{ github.event.workflow_run.html_url }}';
+            const branch = '${{ github.event.workflow_run.head_branch }}';
+            const runId = '${{ github.event.workflow_run.id }}';
+            const triggeredBy = '${{ github.event.workflow_run.triggering_actor.login }}';
+            
+            // Check if there's already an open issue for this workflow
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'workflow-failure,automated'
+            });
+            
+            const existingIssue = issues.find(issue => 
+              issue.title.includes(workflowName) && 
+              issue.title.includes('Failed')
+            );
+            
+            if (existingIssue) {
+              // Update existing issue with new failure
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: `
+            ## 🔄 Another Failure Detected
+            
+            **Workflow**: ${workflowName}
+            **Branch**: \`${branch}\`
+            **Triggered by**: @${triggeredBy}
+            **Run ID**: ${runId}
+            **Time**: ${new Date().toISOString()}
+            
+            **🔗 Links:**
+            - [View Failed Run](${workflowUrl})
+            - [Workflow Logs](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${runId})
+            
+            ---
+            
+            _This is an automated alert. Please investigate and fix the workflow failure._
+                `
+              });
+            } else {
+              // Create new failure issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `🚨 Workflow Failed: ${workflowName}`,
+                body: `
+            ## ⚠️ Workflow Failure Alert
+            
+            A critical workflow has failed and requires immediate attention.
+            
+            ### 📋 Failure Details
+            
+            **Workflow**: ${workflowName}
+            **Branch**: \`${branch}\`
+            **Triggered by**: @${triggeredBy}
+            **Run ID**: ${runId}
+            **Failure Time**: ${new Date().toISOString()}
+            
+            ### 🔍 Investigation Steps
+            
+            1. **Check the workflow logs**: [View Run](${workflowUrl})
+            2. **Review recent changes**: Check commits on \`${branch}\`
+            3. **Examine error messages**: Look for specific failure points
+            4. **Test locally**: Reproduce the issue in development environment
+            
+            ### 🔗 Helpful Links
+            
+            - [Workflow Logs](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${runId})
+            - [Workflow File](https://github.com/${context.repo.owner}/${context.repo.repo}/blob/main/.github/workflows/)
+            - [Troubleshooting Guide](./.github/SETUP.md#troubleshooting)
+            
+            ### ✅ Resolution Checklist
+            
+            - [ ] Issue identified and root cause determined
+            - [ ] Fix implemented and tested locally
+            - [ ] Workflow re-run successful
+            - [ ] Documentation updated (if needed)
+            - [ ] Preventive measures considered
+            
+            ---
+            
+            **⏰ SLA**: This issue should be resolved within 24 hours for critical workflows.
+            
+            _This is an automated alert created by the monitoring system._
+                `,
+                labels: ['workflow-failure', 'urgent', 'automated', 'bug'],
+                assignees: ['chakravartyharish']
+              });
+            }
+
+      - name: Send Discord notification
+        if: env.DISCORD_WEBHOOK_URL != ''
+        run: |
+          curl -H "Content-Type: application/json" \
+               -d '{
+                 "embeds": [{
+                   "title": "🚨 Workflow Failure Alert",
+                   "description": "**Workflow**: ${{ github.event.workflow_run.name }}\n**Branch**: `${{ github.event.workflow_run.head_branch }}`\n**Triggered by**: ${{ github.event.workflow_run.triggering_actor.login }}",
+                   "color": 15158332,
+                   "fields": [
+                     {
+                       "name": "🔗 View Logs",
+                       "value": "[Click here](${{ github.event.workflow_run.html_url }})",
+                       "inline": true
+                     },
+                     {
+                       "name": "⏰ Time",
+                       "value": "$(date -u +\"%Y-%m-%d %H:%M:%S UTC\")",
+                       "inline": true
+                     }
+                   ],
+                   "footer": {
+                     "text": "NEETAI Monitoring System"
+                   }
+                 }]
+               }' \
+               "${{ secrets.DISCORD_WEBHOOK_URL }}"
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+  # Monitor deployment success and send notifications
+  deployment-success:
+    name: 🚀 Deployment Success
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.name == '🚀 Deploy' && github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Send success notification
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = '${{ github.event.workflow_run.head_branch }}';
+            const environment = branch === 'main' ? 'Production' : 'Staging';
+            const workflowUrl = '${{ github.event.workflow_run.html_url }}';
+            
+            console.log(`✅ ${environment} deployment successful for branch: ${branch}`);
+            
+            // Add deployment success comment to related PRs
+            if (branch !== 'main') {
+              const { data: pulls } = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                head: `${context.repo.owner}:${branch}`,
+                state: 'open'
+              });
+              
+              for (const pr of pulls) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body: `
+            ## ✅ Deployment Successful!
+            
+            Your changes have been successfully deployed to **${environment}**.
+            
+            **🔗 View Deployment**: [Staging Preview](${pr.head.ref}.preview-url.com)
+            **📊 Build Logs**: [View Details](${workflowUrl})
+            
+            _Deployed at: ${new Date().toISOString()}_
+                  `
+                });
+              }
+            }
+
+      - name: Send Slack notification
+        if: env.SLACK_WEBHOOK_URL != ''
+        run: |
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          ENVIRONMENT=$([ "$BRANCH" = "main" ] && echo "Production" || echo "Staging")
+          
+          curl -X POST \
+               -H 'Content-type: application/json' \
+               --data "{
+                 \"text\": \"🚀 Deployment Success\",
+                 \"attachments\": [{
+                   \"color\": \"good\",
+                   \"fields\": [
+                     {
+                       \"title\": \"Environment\",
+                       \"value\": \"$ENVIRONMENT\",
+                       \"short\": true
+                     },
+                     {
+                       \"title\": \"Branch\",
+                       \"value\": \"$BRANCH\",
+                       \"short\": true
+                     },
+                     {
+                       \"title\": \"View Logs\",
+                       \"value\": \"<${{ github.event.workflow_run.html_url }}|Click here>\",
+                       \"short\": true
+                     }
+                   ]
+                 }]
+               }" \
+               "${{ secrets.SLACK_WEBHOOK_URL }}"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # Generate weekly/monthly metrics report
+  generate-metrics-report:
+    name: 📈 Generate Metrics Report
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate workflow metrics
+        id: metrics
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const reportType = '${{ github.event.inputs.report_type }}' || 'weekly';
+            const days = reportType === 'weekly' ? 7 : (reportType === 'monthly' ? 30 : 14);
+            
+            const since = new Date();
+            since.setDate(since.getDate() - days);
+            
+            // Get workflow runs
+            const { data: workflowRuns } = await github.rest.actions.listWorkflowRunsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100,
+              created: `>=${since.toISOString()}`
+            });
+            
+            // Calculate metrics
+            const totalRuns = workflowRuns.workflow_runs.length;
+            const successfulRuns = workflowRuns.workflow_runs.filter(run => run.conclusion === 'success').length;
+            const failedRuns = workflowRuns.workflow_runs.filter(run => run.conclusion === 'failure').length;
+            const cancelledRuns = workflowRuns.workflow_runs.filter(run => run.conclusion === 'cancelled').length;
+            
+            const successRate = totalRuns > 0 ? ((successfulRuns / totalRuns) * 100).toFixed(1) : '0';
+            
+            // Get PR metrics
+            const { data: pullRequests } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              sort: 'created',
+              per_page: 100
+            });
+            
+            const recentPRs = pullRequests.filter(pr => new Date(pr.created_at) >= since);
+            const openPRs = recentPRs.filter(pr => pr.state === 'open').length;
+            const closedPRs = recentPRs.filter(pr => pr.state === 'closed').length;
+            const mergedPRs = recentPRs.filter(pr => pr.merged_at).length;
+            
+            // Get issue metrics
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              since: since.toISOString(),
+              per_page: 100
+            });
+            
+            const newIssues = issues.filter(issue => !issue.pull_request).length;
+            const closedIssues = issues.filter(issue => !issue.pull_request && issue.state === 'closed').length;
+            
+            // Calculate average PR merge time
+            const mergedPRsWithTimes = recentPRs
+              .filter(pr => pr.merged_at)
+              .map(pr => {
+                const created = new Date(pr.created_at);
+                const merged = new Date(pr.merged_at);
+                return (merged - created) / (1000 * 60 * 60); // hours
+              });
+            
+            const avgMergeTime = mergedPRsWithTimes.length > 0 
+              ? (mergedPRsWithTimes.reduce((a, b) => a + b, 0) / mergedPRsWithTimes.length).toFixed(1)
+              : '0';
+            
+            // Store metrics
+            core.setOutput('total-runs', totalRuns);
+            core.setOutput('success-rate', successRate);
+            core.setOutput('failed-runs', failedRuns);
+            core.setOutput('open-prs', openPRs);
+            core.setOutput('merged-prs', mergedPRs);
+            core.setOutput('new-issues', newIssues);
+            core.setOutput('closed-issues', closedIssues);
+            core.setOutput('avg-merge-time', avgMergeTime);
+            core.setOutput('report-period', reportType);
+            core.setOutput('days', days);
+
+      - name: Create metrics report issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const reportType = '${{ steps.metrics.outputs.report-period }}';
+            const days = '${{ steps.metrics.outputs.days }}';
+            const totalRuns = '${{ steps.metrics.outputs.total-runs }}';
+            const successRate = '${{ steps.metrics.outputs.success-rate }}';
+            const failedRuns = '${{ steps.metrics.outputs.failed-runs }}';
+            const openPRs = '${{ steps.metrics.outputs.open-prs }}';
+            const mergedPRs = '${{ steps.metrics.outputs.merged-prs }}';
+            const newIssues = '${{ steps.metrics.outputs.new-issues }}';
+            const closedIssues = '${{ steps.metrics.outputs.closed-issues }}';
+            const avgMergeTime = '${{ steps.metrics.outputs.avg-merge-time }}';
+            
+            const reportDate = new Date().toISOString().split('T')[0];
+            
+            const reportBody = `
+            ## 📊 ${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Metrics Report
+            
+            **Report Period**: Last ${days} days (${reportDate})
+            
+            ### 🔄 Workflow Metrics
+            
+            | Metric | Value |
+            |--------|-------|
+            | **Total Workflow Runs** | ${totalRuns} |
+            | **Success Rate** | ${successRate}% |
+            | **Failed Runs** | ${failedRuns} |
+            | **Average Run Time** | _Data available in Actions tab_ |
+            
+            ### 🔀 Pull Request Metrics
+            
+            | Metric | Value |
+            |--------|-------|
+            | **Open PRs** | ${openPRs} |
+            | **Merged PRs** | ${mergedPRs} |
+            | **Average Merge Time** | ${avgMergeTime} hours |
+            | **PR Success Rate** | ${mergedPRs > 0 ? ((mergedPRs / (parseInt(openPRs) + parseInt(mergedPRs))) * 100).toFixed(1) : '0'}% |
+            
+            ### 🐛 Issue Metrics
+            
+            | Metric | Value |
+            |--------|-------|
+            | **New Issues** | ${newIssues} |
+            | **Closed Issues** | ${closedIssues} |
+            | **Issue Resolution Rate** | ${newIssues > 0 ? ((closedIssues / newIssues) * 100).toFixed(1) : '0'}% |
+            
+            ### 🎯 Key Insights
+            
+            ${successRate < 90 ? '⚠️ **Workflow success rate is below 90%** - Investigation needed' : '✅ Workflow success rate is healthy'}
+            
+            ${avgMergeTime > 24 ? '⚠️ **Average PR merge time is over 24 hours** - Consider streamlining review process' : '✅ PR merge time is within acceptable range'}
+            
+            ${openPRs > 10 ? '⚠️ **High number of open PRs** - Consider reviewing backlog' : '✅ PR backlog is manageable'}
+            
+            ### 📈 Trends & Recommendations
+            
+            - **Deployment Frequency**: Monitor deployment success rate
+            - **Code Quality**: Review failed workflow patterns
+            - **Team Velocity**: Track PR throughput and review times
+            - **Issue Management**: Monitor issue resolution patterns
+            
+            ### 🔗 Useful Links
+            
+            - [Workflow Runs](https://github.com/${context.repo.owner}/${context.repo.repo}/actions)
+            - [Open Pull Requests](https://github.com/${context.repo.owner}/${context.repo.repo}/pulls)
+            - [Recent Issues](https://github.com/${context.repo.owner}/${context.repo.repo}/issues)
+            
+            ---
+            
+            _This report is automatically generated. For questions or suggestions, please create an issue._
+            `;
+            
+            // Check if there's an existing metrics report issue that's still open
+            const { data: existingIssues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'metrics-report,automated'
+            });
+            
+            if (existingIssues.length > 0) {
+              // Close old metrics reports
+              for (const issue of existingIssues) {
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issue.number,
+                  state: 'closed'
+                });
+              }
+            }
+            
+            // Create new metrics report
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `📊 ${reportType.charAt(0).toUpperCase() + reportType.slice(1)} Metrics Report - ${reportDate}`,
+              body: reportBody,
+              labels: ['metrics-report', 'automated', 'documentation']
+            });
+
+  # Performance regression detection
+  performance-monitoring:
+    name: ⚡ Performance Monitoring
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.name == '🔄 Pull Request CI' && github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Check for performance regressions
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // This is a placeholder for performance monitoring
+            // You can integrate with tools like Lighthouse CI, Bundle Analyzer, etc.
+            
+            console.log('Performance monitoring placeholder');
+            console.log('Workflow:', '${{ github.event.workflow_run.name }}');
+            console.log('Branch:', '${{ github.event.workflow_run.head_branch }}');
+            
+            // Example: Check bundle size changes
+            // Example: Monitor Core Web Vitals
+            // Example: Track API response times
+            
+            // For now, just log that monitoring completed
+            console.log('✅ Performance monitoring completed');
+
+  # Security alerts monitoring
+  security-monitoring:
+    name: 🔒 Security Monitoring
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.name == '🔒 CodeQL Security Analysis'
+    steps:
+      - name: Monitor security scan results
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const conclusion = '${{ github.event.workflow_run.conclusion }}';
+            const workflowUrl = '${{ github.event.workflow_run.html_url }}';
+            
+            if (conclusion === 'failure') {
+              // Create high-priority security issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '🚨 Security Scan Failed - Immediate Attention Required',
+                body: `
+            ## ⚠️ Critical Security Alert
+            
+            The CodeQL security analysis has failed, which may indicate:
+            
+            1. **New security vulnerabilities** detected in the codebase
+            2. **Analysis errors** that need investigation
+            3. **Configuration issues** with the security workflow
+            
+            ### 🔍 Investigation Required
+            
+            - [View Failed Security Scan](${workflowUrl})
+            - Check the Security tab for detailed findings
+            - Review recent code changes for potential security issues
+            
+            ### ⏰ SLA
+            
+            Security issues must be addressed within **2 hours** of detection.
+            
+            ---
+            
+            _This is an automated security alert._
+                `,
+                labels: ['security', 'urgent', 'automated', 'high-priority'],
+                assignees: ['chakravartyharish']
+              });
+              
+              console.log('🚨 Security scan failed - alert created');
+            } else if (conclusion === 'success') {
+              console.log('✅ Security scan completed successfully');
+            }
+
+  # Close resolved monitoring issues
+  cleanup-resolved-issues:
+    name: 🧹 Cleanup Resolved Issues
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
+    steps:
+      - name: Close resolved workflow failure issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const workflowName = '${{ github.event.workflow_run.name }}';
+            
+            // Find open workflow failure issues for this workflow
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'workflow-failure,automated'
+            });
+            
+            const relatedIssues = issues.filter(issue => 
+              issue.title.includes(workflowName) && 
+              issue.title.includes('Failed')
+            );
+            
+            for (const issue of relatedIssues) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `
+            ## ✅ Issue Resolved
+            
+            The workflow **${workflowName}** has completed successfully, indicating this issue has been resolved.
+            
+            **Resolution Time**: ${new Date().toISOString()}
+            **Successful Run**: [${{ github.event.workflow_run.html_url }}](${{ github.event.workflow_run.html_url }})
+            
+            Closing this issue automatically. If the problem persists, please reopen or create a new issue.
+                `
+              });
+              
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed'
+              });
+              
+              console.log(`Closed resolved issue: ${issue.title}`);
+            }

@@ -1,0 +1,338 @@
+name: 🚀 Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Type of release'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - prerelease
+      prerelease:
+        description: 'Mark as prerelease'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  NODE_ENV: production
+
+jobs:
+  # Check if release is needed based on commits
+  check-release:
+    name: 🔍 Check Release Need
+    runs-on: ubuntu-latest
+    outputs:
+      should-release: ${{ steps.check.outputs.should-release }}
+      version-type: ${{ steps.check.outputs.version-type }}
+      new-version: ${{ steps.check.outputs.new-version }}
+      has-breaking: ${{ steps.check.outputs.has-breaking }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for release
+        id: check
+        run: |
+          # Get the latest tag
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "Latest tag: $LATEST_TAG"
+          
+          # Get commits since last tag
+          COMMITS=$(git log --oneline $LATEST_TAG..HEAD --grep="^feat" --grep="^fix" --grep="^BREAKING" --extended-regexp)
+          
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "should-release=true" >> $GITHUB_OUTPUT
+            echo "version-type=${{ github.event.inputs.release_type }}" >> $GITHUB_OUTPUT
+          elif [[ -n "$COMMITS" ]]; then
+            echo "should-release=true" >> $GITHUB_OUTPUT
+            
+            # Determine version bump type
+            if echo "$COMMITS" | grep -q "BREAKING CHANGE\|^feat!:\|^fix!:"; then
+              echo "version-type=major" >> $GITHUB_OUTPUT
+              echo "has-breaking=true" >> $GITHUB_OUTPUT
+            elif echo "$COMMITS" | grep -q "^feat"; then
+              echo "version-type=minor" >> $GITHUB_OUTPUT
+              echo "has-breaking=false" >> $GITHUB_OUTPUT
+            else
+              echo "version-type=patch" >> $GITHUB_OUTPUT
+              echo "has-breaking=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "should-release=false" >> $GITHUB_OUTPUT
+          fi
+          
+          echo "Commits since last tag:"
+          echo "$COMMITS"
+
+  # Generate changelog and create release
+  create-release:
+    name: 📝 Create Release
+    runs-on: ubuntu-latest
+    needs: check-release
+    if: needs.check-release.outputs.should-release == 'true'
+    permissions:
+      contents: write
+      pull-requests: read
+      issues: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Get package version
+        id: package-version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "current-version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Bump version
+        id: version
+        run: |
+          # Install semver for version bumping
+          npm install -g semver
+          
+          CURRENT_VERSION="${{ steps.package-version.outputs.current-version }}"
+          VERSION_TYPE="${{ needs.check-release.outputs.version-type }}"
+          
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ github.event.inputs.prerelease }}" == "true" ]]; then
+            NEW_VERSION=$(semver -i pre$VERSION_TYPE $CURRENT_VERSION --preid=rc)
+          else
+            NEW_VERSION=$(semver -i $VERSION_TYPE $CURRENT_VERSION)
+          fi
+          
+          echo "new-version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version will be: $NEW_VERSION"
+          
+          # Update package.json version
+          npm version $NEW_VERSION --no-git-tag-version
+          
+          # Update package.json in workspaces (if any)
+          find apps packages -name package.json -exec npm pkg set version=$NEW_VERSION --prefix={//} \; 2>/dev/null || true
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get the latest tag for changelog generation
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          NEW_TAG="v${{ steps.version.outputs.new-version }}"
+          
+          echo "Generating changelog from $LATEST_TAG to HEAD..."
+          
+          # Create changelog
+          cat > CHANGELOG_TEMP.md << 'EOF'
+          # 🚀 Release v${{ steps.version.outputs.new-version }}
+          
+          **Release Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Release Type:** ${{ needs.check-release.outputs.version-type }}
+          
+          EOF
+          
+          if [[ "${{ needs.check-release.outputs.has-breaking }}" == "true" ]]; then
+            echo "## ⚠️ BREAKING CHANGES" >> CHANGELOG_TEMP.md
+            echo "" >> CHANGELOG_TEMP.md
+            git log --oneline ${LATEST_TAG}..HEAD --grep="BREAKING CHANGE" --grep="^feat!:" --grep="^fix!:" --extended-regexp \
+              | sed 's/^[a-f0-9]* /- /' >> CHANGELOG_TEMP.md || echo "- See commit history for breaking changes" >> CHANGELOG_TEMP.md
+            echo "" >> CHANGELOG_TEMP.md
+          fi
+          
+          echo "## ✨ Features" >> CHANGELOG_TEMP.md
+          echo "" >> CHANGELOG_TEMP.md
+          git log --oneline ${LATEST_TAG}..HEAD --grep="^feat" --extended-regexp \
+            | grep -v "^feat!:" \
+            | sed 's/^[a-f0-9]* /- /' >> CHANGELOG_TEMP.md || echo "- No new features in this release" >> CHANGELOG_TEMP.md
+          echo "" >> CHANGELOG_TEMP.md
+          
+          echo "## 🐛 Bug Fixes" >> CHANGELOG_TEMP.md
+          echo "" >> CHANGELOG_TEMP.md
+          git log --oneline ${LATEST_TAG}..HEAD --grep="^fix" --extended-regexp \
+            | grep -v "^fix!:" \
+            | sed 's/^[a-f0-9]* /- /' >> CHANGELOG_TEMP.md || echo "- No bug fixes in this release" >> CHANGELOG_TEMP.md
+          echo "" >> CHANGELOG_TEMP.md
+          
+          echo "## 📚 Documentation" >> CHANGELOG_TEMP.md
+          echo "" >> CHANGELOG_TEMP.md
+          git log --oneline ${LATEST_TAG}..HEAD --grep="^docs" \
+            | sed 's/^[a-f0-9]* /- /' >> CHANGELOG_TEMP.md || echo "- No documentation changes" >> CHANGELOG_TEMP.md
+          echo "" >> CHANGELOG_TEMP.md
+          
+          echo "## 🔧 Maintenance" >> CHANGELOG_TEMP.md
+          echo "" >> CHANGELOG_TEMP.md
+          git log --oneline ${LATEST_TAG}..HEAD --grep="^chore\|^ci\|^style\|^refactor" --extended-regexp \
+            | sed 's/^[a-f0-9]* /- /' >> CHANGELOG_TEMP.md || echo "- No maintenance changes" >> CHANGELOG_TEMP.md
+          echo "" >> CHANGELOG_TEMP.md
+          
+          echo "## 🔗 Links" >> CHANGELOG_TEMP.md
+          echo "" >> CHANGELOG_TEMP.md
+          echo "- **Full Changelog**: [\`${LATEST_TAG}...${NEW_TAG}\`](https://github.com/${{ github.repository }}/compare/${LATEST_TAG}...${NEW_TAG})" >> CHANGELOG_TEMP.md
+          echo "- **Release Assets**: [Download](https://github.com/${{ github.repository }}/releases/tag/${NEW_TAG})" >> CHANGELOG_TEMP.md
+          
+          # Read the changelog content
+          CHANGELOG_CONTENT=$(cat CHANGELOG_TEMP.md)
+          
+          # Save changelog to output (escape for JSON)
+          echo 'changelog<<EOF' >> $GITHUB_OUTPUT
+          cat CHANGELOG_TEMP.md >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
+
+      - name: Update CHANGELOG.md
+        run: |
+          # Create or update main CHANGELOG.md
+          if [[ -f "CHANGELOG.md" ]]; then
+            # Backup current changelog
+            cp CHANGELOG.md CHANGELOG_BACKUP.md
+            
+            # Add new release to top of existing changelog
+            echo "$(cat CHANGELOG_TEMP.md)" > CHANGELOG_NEW.md
+            echo "" >> CHANGELOG_NEW.md
+            echo "---" >> CHANGELOG_NEW.md
+            echo "" >> CHANGELOG_NEW.md
+            cat CHANGELOG_BACKUP.md >> CHANGELOG_NEW.md
+            mv CHANGELOG_NEW.md CHANGELOG.md
+          else
+            # Create new changelog
+            mv CHANGELOG_TEMP.md CHANGELOG.md
+          fi
+
+      - name: Commit version bump and changelog
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          git add package.json CHANGELOG.md
+          find apps packages -name package.json -exec git add {} \; 2>/dev/null || true
+          
+          git commit -m "chore: release v${{ steps.version.outputs.new-version }}"
+          git tag -a "v${{ steps.version.outputs.new-version }}" -m "Release v${{ steps.version.outputs.new-version }}"
+
+      - name: Create release assets
+        run: |
+          # Create release assets directory
+          mkdir -p release-assets
+          
+          # Create source archive
+          git archive --format=zip --prefix=neetai-v${{ steps.version.outputs.new-version }}/ HEAD > release-assets/neetai-v${{ steps.version.outputs.new-version }}-source.zip
+          
+          # Create build artifacts (if they exist)
+          if [[ -d "apps/web/.next" ]]; then
+            cd apps/web
+            zip -r ../../release-assets/neetai-v${{ steps.version.outputs.new-version }}-web-build.zip .next/
+            cd ../..
+          fi
+          
+          # Create documentation bundle
+          if [[ -d "docs" ]]; then
+            zip -r release-assets/neetai-v${{ steps.version.outputs.new-version }}-docs.zip docs/
+          fi
+          
+          # List created assets
+          ls -la release-assets/
+
+      - name: Push changes and tags
+        run: |
+          git push origin main
+          git push origin "v${{ steps.version.outputs.new-version }}"
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        id: create-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.version.outputs.new-version }}
+          release_name: 🚀 NEETAI v${{ steps.version.outputs.new-version }}
+          body: ${{ steps.changelog.outputs.changelog }}
+          draft: false
+          prerelease: ${{ github.event.inputs.prerelease == 'true' }}
+
+      - name: Upload Release Assets
+        run: |
+          # Upload all assets in release-assets directory
+          for file in release-assets/*; do
+            if [[ -f "$file" ]]; then
+              filename=$(basename "$file")
+              echo "Uploading $filename..."
+              
+              curl -X POST \
+                -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+                -H "Content-Type: application/octet-stream" \
+                --data-binary @"$file" \
+                "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.create-release.outputs.id }}/assets?name=$filename"
+            fi
+          done
+
+      - name: Update README with version badge
+        run: |
+          # Update version badge in README
+          if [[ -f "README.md" ]]; then
+            sed -i "s/version-v[0-9]\+\.[0-9]\+\.[0-9]\+-/version-v${{ steps.version.outputs.new-version }}-/" README.md || \
+            sed -i "1i ![Version](https://img.shields.io/badge/version-v${{ steps.version.outputs.new-version }}-blue)" README.md
+            
+            git add README.md
+            git commit -m "docs: update version badge in README" || true
+            git push origin main || true
+          fi
+
+      - name: Post-release summary
+        run: |
+          echo "## 🎉 Release v${{ steps.version.outputs.new-version }} Created Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Release Type:** ${{ needs.check-release.outputs.version-type }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** v${{ steps.version.outputs.new-version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Prerelease:** ${{ github.event.inputs.prerelease || 'false' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Breaking Changes:** ${{ needs.check-release.outputs.has-breaking || 'false' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🔗 Links:**" >> $GITHUB_STEP_SUMMARY
+          echo "- [View Release](https://github.com/${{ github.repository }}/releases/tag/v${{ steps.version.outputs.new-version }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [Full Changelog](https://github.com/${{ github.repository }}/compare/${LATEST_TAG}...v${{ steps.version.outputs.new-version }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [Download Assets](https://github.com/${{ github.repository }}/releases/tag/v${{ steps.version.outputs.new-version }})" >> $GITHUB_STEP_SUMMARY
+
+  # Notify on release completion
+  notify-release:
+    name: 📢 Notify Release
+    runs-on: ubuntu-latest
+    needs: [check-release, create-release]
+    if: needs.check-release.outputs.should-release == 'true' && always()
+    steps:
+      - name: Notify success
+        if: needs.create-release.result == 'success'
+        run: |
+          echo "🎉 Release completed successfully!"
+          # Add webhook notifications here if needed
+          
+      - name: Notify failure
+        if: needs.create-release.result == 'failure'
+        run: |
+          echo "❌ Release failed!"
+          # Add failure notifications here if needed

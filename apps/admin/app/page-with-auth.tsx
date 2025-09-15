@@ -3,18 +3,24 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@repo/ui/button';
+import { useAuth } from '@neet/auth';
 
 export default function AdminDashboard() {
+  const { user, signOut } = useAuth();
   const [stats] = useState({
-    totalQuestions: 12456,
-    totalUploads: 89,
-    processingQueue: 3,
-    activeUsers: 1234,
+    totalQuestions: 0,
+    totalUploads: 0,
+    processingQueue: 0,
+    activeUsers: 0,
   });
 
   const handleSignOut = async () => {
-    console.log('Sign out clicked');
-    // Placeholder for sign out logic
+    try {
+      await signOut();
+      window.location.href = '/auth/login';
+    } catch (error) {
+      console.error('Failed to sign out:', error);
+    }
   };
 
   return (
@@ -30,7 +36,7 @@ export default function AdminDashboard() {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-600">
-                Welcome, admin@neetai.dev
+                Welcome, {user?.email}
               </span>
               <Button variant="outline" size="sm">
                 Profile
@@ -103,7 +109,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Quick Actions */}
+        {/* Main Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="lg:col-span-2">
             <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -162,21 +168,7 @@ export default function AdminDashboard() {
             <div className="bg-white p-6 rounded-lg shadow-sm">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h2>
               <div className="space-y-3">
-                <div className="flex items-center text-sm">
-                  <div className="w-2 h-2 bg-green-400 rounded-full mr-3"></div>
-                  <span className="text-gray-600">Processed NEET 2024 Paper - Physics</span>
-                  <span className="text-gray-400 ml-auto">2 hrs ago</span>
-                </div>
-                <div className="flex items-center text-sm">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
-                  <span className="text-gray-600">New user registered: student@example.com</span>
-                  <span className="text-gray-400 ml-auto">4 hrs ago</span>
-                </div>
-                <div className="flex items-center text-sm">
-                  <div className="w-2 h-2 bg-yellow-400 rounded-full mr-3"></div>
-                  <span className="text-gray-600">OCR processing queue cleared</span>
-                  <span className="text-gray-400 ml-auto">6 hrs ago</span>
-                </div>
+                <p className="text-sm text-gray-600">No recent activity</p>
               </div>
             </div>
 

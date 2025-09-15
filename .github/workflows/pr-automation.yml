@@ -1,0 +1,525 @@
+name: 🤖 PR Automation
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened, ready_for_review]
+  schedule:
+    # Run stale PR check every day at 9 AM UTC
+    - cron: '0 9 * * *'
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  # Auto-label PRs based on files changed and content
+  auto-label:
+    name: 🏷️ Auto Label PRs
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get changed files
+        id: changed-files
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            
+            const changedFiles = files.map(file => file.filename);
+            core.setOutput('files', JSON.stringify(changedFiles));
+            
+            // Calculate PR size
+            const additions = files.reduce((sum, file) => sum + file.additions, 0);
+            const deletions = files.reduce((sum, file) => sum + file.deletions, 0);
+            const totalChanges = additions + deletions;
+            
+            let sizeLabel = '';
+            if (totalChanges <= 10) {
+              sizeLabel = 'size/XS';
+            } else if (totalChanges <= 50) {
+              sizeLabel = 'size/S';
+            } else if (totalChanges <= 200) {
+              sizeLabel = 'size/M';
+            } else if (totalChanges <= 500) {
+              sizeLabel = 'size/L';
+            } else {
+              sizeLabel = 'size/XL';
+            }
+            
+            core.setOutput('size-label', sizeLabel);
+            core.setOutput('additions', additions);
+            core.setOutput('deletions', deletions);
+
+      - name: Auto-assign labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const changedFiles = JSON.parse('${{ steps.changed-files.outputs.files }}');
+            const prTitle = context.payload.pull_request.title.toLowerCase();
+            const prBody = (context.payload.pull_request.body || '').toLowerCase();
+            const sizeLabel = '${{ steps.changed-files.outputs.size-label }}';
+            
+            const labels = [];
+            
+            // Size label
+            labels.push(sizeLabel);
+            
+            // Area-based labels
+            if (changedFiles.some(file => file.startsWith('apps/web/'))) {
+              labels.push('area/web-app');
+            }
+            if (changedFiles.some(file => file.startsWith('apps/mobile/'))) {
+              labels.push('area/mobile-app');
+            }
+            if (changedFiles.some(file => file.startsWith('apps/docs/'))) {
+              labels.push('area/documentation');
+            }
+            if (changedFiles.some(file => file.startsWith('packages/auth/'))) {
+              labels.push('area/authentication');
+            }
+            if (changedFiles.some(file => file.startsWith('packages/database/'))) {
+              labels.push('area/database');
+            }
+            if (changedFiles.some(file => file.startsWith('packages/ui/'))) {
+              labels.push('area/ui-components');
+            }
+            if (changedFiles.some(file => file.startsWith('packages/ai/'))) {
+              labels.push('area/ai-ml');
+            }
+            if (changedFiles.some(file => file.startsWith('packages/analytics/'))) {
+              labels.push('area/analytics');
+            }
+            if (changedFiles.some(file => file.startsWith('.github/workflows/'))) {
+              labels.push('area/ci-cd');
+            }
+            if (changedFiles.some(file => file.startsWith('supabase/'))) {
+              labels.push('area/database');
+            }
+            
+            // Type-based labels based on conventional commit format
+            if (prTitle.startsWith('feat')) {
+              labels.push('type/enhancement');
+            } else if (prTitle.startsWith('fix')) {
+              labels.push('type/bug');
+            } else if (prTitle.startsWith('docs')) {
+              labels.push('type/documentation');
+            } else if (prTitle.startsWith('style')) {
+              labels.push('type/style');
+            } else if (prTitle.startsWith('refactor')) {
+              labels.push('type/refactor');
+            } else if (prTitle.startsWith('test')) {
+              labels.push('type/test');
+            } else if (prTitle.startsWith('chore')) {
+              labels.push('type/chore');
+            } else if (prTitle.startsWith('ci')) {
+              labels.push('type/ci-cd');
+            } else if (prTitle.startsWith('perf')) {
+              labels.push('type/performance');
+            } else if (prTitle.startsWith('security')) {
+              labels.push('type/security');
+            }
+            
+            // Breaking change detection
+            if (prTitle.includes('!') || prBody.includes('breaking change')) {
+              labels.push('breaking-change');
+            }
+            
+            // Priority labels based on content
+            if (prBody.includes('urgent') || prBody.includes('critical') || prBody.includes('hotfix')) {
+              labels.push('priority/high');
+            } else if (prBody.includes('nice to have') || prBody.includes('minor')) {
+              labels.push('priority/low');
+            } else {
+              labels.push('priority/medium');
+            }
+            
+            // Dependencies label
+            if (changedFiles.some(file => file.includes('package.json') || file.includes('package-lock.json'))) {
+              labels.push('dependencies');
+            }
+            
+            // Configuration label
+            if (changedFiles.some(file => file.includes('config') || file.endsWith('.config.js') || file.endsWith('.config.ts'))) {
+              labels.push('configuration');
+            }
+            
+            // Security label
+            if (changedFiles.some(file => file.includes('auth') || file.includes('security') || file.includes('.env'))) {
+              labels.push('security');
+            }
+            
+            // Apply labels
+            if (labels.length > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                labels: labels
+              });
+              
+              console.log(`Applied labels: ${labels.join(', ')}`);
+            }
+
+  # Auto-assign reviewers based on CODEOWNERS and expertise
+  auto-assign:
+    name: 👥 Auto Assign Reviewers
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Auto-assign reviewers
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Don't auto-assign for draft PRs or if already assigned
+            if (context.payload.pull_request.draft) {
+              console.log('Skipping auto-assignment for draft PR');
+              return;
+            }
+            
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            
+            const changedFiles = files.map(file => file.filename);
+            const reviewers = [];
+            
+            // Define expertise mapping (can be moved to a config file)
+            const expertiseMap = {
+              'chakravartyharish': {
+                areas: ['web-app', 'mobile-app', 'ai-ml', 'database', 'ci-cd', 'documentation'],
+                files: ['.github/', 'apps/', 'packages/', 'docs/']
+              }
+            };
+            
+            // Find relevant reviewers based on changed files
+            for (const [reviewer, expertise] of Object.entries(expertiseMap)) {
+              const isRelevant = changedFiles.some(file => 
+                expertise.files.some(pattern => file.startsWith(pattern))
+              );
+              
+              if (isRelevant && !reviewers.includes(reviewer)) {
+                reviewers.push(reviewer);
+              }
+            }
+            
+            // Always assign the main maintainer for significant changes
+            const totalChanges = files.reduce((sum, file) => sum + file.additions + file.deletions, 0);
+            if (totalChanges > 100 && !reviewers.includes('chakravartyharish')) {
+              reviewers.push('chakravartyharish');
+            }
+            
+            // Don't assign the author as reviewer
+            const author = context.payload.pull_request.user.login;
+            const filteredReviewers = reviewers.filter(reviewer => reviewer !== author);
+            
+            if (filteredReviewers.length > 0) {
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                reviewers: filteredReviewers
+              });
+              
+              console.log(`Assigned reviewers: ${filteredReviewers.join(', ')}`);
+            }
+
+  # Add helpful PR comments
+  pr-comments:
+    name: 💬 PR Comments
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
+    steps:
+      - name: Welcome comment for first-time contributors
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Check if this is the user's first contribution
+            const { data: pullRequests } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'all',
+              creator: context.payload.pull_request.user.login
+            });
+            
+            if (pullRequests.length === 1) {
+              const welcomeMessage = `
+            ## 🎉 Welcome to NEETAI!
+            
+            Thank you for your first contribution! Here are some things to keep in mind:
+            
+            ### 📋 PR Checklist
+            - [ ] Code follows our style guidelines
+            - [ ] Self-review completed
+            - [ ] Tests added/updated (if applicable)
+            - [ ] Documentation updated (if needed)
+            
+            ### 🚀 What happens next?
+            1. **Automated checks** will run on your PR
+            2. **Reviewers** will be automatically assigned
+            3. **Manual review** will be conducted
+            4. **Feedback** will be provided if needed
+            
+            ### 📚 Helpful Resources
+            - [Contributing Guide](./CONTRIBUTING.md)
+            - [Code of Conduct](./CODE_OF_CONDUCT.md)
+            - [Development Setup](./.github/SETUP.md)
+            
+            We appreciate your contribution to making NEET preparation better for students! 🚀
+            `;
+            
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: welcomeMessage
+              });
+            }
+
+      - name: Add preview links for web app changes
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+            });
+            
+            const hasWebAppChanges = files.some(file => 
+              file.filename.startsWith('apps/web/') && 
+              (file.filename.endsWith('.tsx') || file.filename.endsWith('.ts') || file.filename.endsWith('.css'))
+            );
+            
+            if (hasWebAppChanges) {
+              const previewMessage = `
+            ## 🔍 Preview Links
+            
+            Your PR includes changes to the web application. Once deployed, you can preview your changes here:
+            
+            - **Staging Preview**: Will be available after merge to \`develop\`
+            - **Build Logs**: Check the [Actions tab](https://github.com/${context.repo.owner}/${context.repo.repo}/actions) for build status
+            
+            ### 📱 Testing Checklist
+            - [ ] Desktop view tested
+            - [ ] Mobile view tested  
+            - [ ] Dark mode compatibility
+            - [ ] Accessibility considerations
+            `;
+            
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: previewMessage
+              });
+            }
+
+  # Manage stale PRs
+  stale-pr-management:
+    name: 🧹 Stale PR Management
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: Close stale PRs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+            
+            const { data: pullRequests } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              sort: 'updated',
+              direction: 'asc'
+            });
+            
+            for (const pr of pullRequests) {
+              const updatedAt = new Date(pr.updated_at);
+              
+              if (updatedAt < thirtyDaysAgo && !pr.draft) {
+                // Check if PR has stale label
+                const hasStaleLabel = pr.labels.some(label => label.name === 'stale');
+                
+                if (!hasStaleLabel) {
+                  // Add stale label and comment
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: pr.number,
+                    labels: ['stale']
+                  });
+                  
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: pr.number,
+                    body: `
+            ## ⏰ Stale PR Notice
+            
+            This PR has been inactive for 30 days and has been marked as stale.
+            
+            ### 🔄 Next Steps
+            - **Update your PR** with recent changes to remove the stale label
+            - **Add a comment** explaining the current status
+            - **Request review** if ready for merge
+            - **Convert to draft** if still in progress
+            
+            This PR will be automatically closed in 7 days if no activity occurs.
+            
+            If you need help or have questions, please reach out in the comments! 🤝
+                    `
+                  });
+                  
+                  console.log(`Marked PR #${pr.number} as stale`);
+                }
+              }
+            }
+
+      - name: Close very stale PRs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const thirtySevenDaysAgo = new Date();
+            thirtySevenDaysAgo.setDate(thirtySevenDaysAgo.getDate() - 37);
+            
+            const { data: pullRequests } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open'
+            });
+            
+            for (const pr of pullRequests) {
+              const updatedAt = new Date(pr.updated_at);
+              const hasStaleLabel = pr.labels.some(label => label.name === 'stale');
+              
+              if (updatedAt < thirtySevenDaysAgo && hasStaleLabel && !pr.draft) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body: `
+            ## 🔒 Auto-closing Stale PR
+            
+            This PR has been inactive for over 37 days and is being automatically closed.
+            
+            ### 🔄 To Reopen
+            - **Update the branch** with latest changes
+            - **Reopen the PR** or create a new one
+            - **Tag a maintainer** for review
+            
+            Thank you for your contribution! Feel free to revisit this anytime. 🙏
+                  `
+                });
+                
+                await github.rest.pulls.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number,
+                  state: 'closed'
+                });
+                
+                console.log(`Closed stale PR #${pr.number}`);
+              }
+            }
+
+  # Handle PR commands in comments
+  pr-commands:
+    name: ⚡ PR Commands
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issue_comment' && github.event.issue.pull_request
+    steps:
+      - name: Handle PR commands
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = context.payload.comment.body.toLowerCase().trim();
+            const commenter = context.payload.comment.user.login;
+            
+            // Only allow maintainers to use commands
+            const maintainers = ['chakravartyharish'];
+            if (!maintainers.includes(commenter)) {
+              console.log(`User ${commenter} is not authorized to use PR commands`);
+              return;
+            }
+            
+            if (comment === '/rerun-ci' || comment === '/rerun-checks') {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: '🔄 Triggering CI rerun by updating PR...'
+              });
+              
+              // Force CI rerun by updating PR title temporarily
+              const pr = context.payload.issue;
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                title: pr.title + ' '
+              });
+              
+              setTimeout(async () => {
+                await github.rest.pulls.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: context.issue.number,
+                  title: pr.title
+                });
+              }, 1000);
+            }
+            
+            if (comment === '/ready-for-review') {
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.issue.number,
+                draft: false
+              });
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: '✅ PR marked as ready for review!'
+              });
+            }
+            
+            if (comment.startsWith('/assign ')) {
+              const assignee = comment.replace('/assign ', '').trim();
+              
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                assignees: [assignee]
+              });
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `👤 Assigned @${assignee} to this PR`
+              });
+            }
