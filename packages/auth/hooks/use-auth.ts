@@ -8,14 +8,25 @@ export interface AuthState {
   user: User | null
   loading: boolean
   error: Error | null
+  signOut: () => Promise<void>
 }
 
 export function useAuth(): AuthState {
-  const [state, setState] = useState<AuthState>({
+  const [state, setState] = useState<Omit<AuthState, 'signOut'>>({
     user: null,
     loading: true,
     error: null,
   })
+
+  const signOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) throw error
+    } catch (error) {
+      setState(prev => ({ ...prev, error: error as Error }))
+      throw error
+    }
+  }
 
   useEffect(() => {
     // Get initial session
@@ -46,5 +57,5 @@ export function useAuth(): AuthState {
     return () => subscription.unsubscribe()
   }, [])
 
-  return state
+  return { ...state, signOut }
 }

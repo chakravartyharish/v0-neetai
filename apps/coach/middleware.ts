@@ -51,8 +51,8 @@ export async function middleware(req: NextRequest): Promise<NextResponse> {
         return NextResponse.redirect(new URL('/login', req.url));
       }
 
-      // Check if institute is active
-      if (user.institutes.status !== 'active') {
+      // Check if institute is active (institutes is an object, not an array)
+      if ((user.institutes as any)?.status !== 'active') {
         return NextResponse.redirect(new URL('/institute/suspended', req.url));
       }
 
@@ -78,7 +78,7 @@ export async function middleware(req: NextRequest): Promise<NextResponse> {
       const response = NextResponse.next();
       response.headers.set('x-user-role', userRole);
       response.headers.set('x-institute-id', user.institute_id);
-      response.headers.set('x-subscription-tier', user.institutes.subscription_tier);
+      response.headers.set('x-subscription-tier', (user.institutes as any)?.subscription_tier || '');
 
       return response;
     } catch (error) {

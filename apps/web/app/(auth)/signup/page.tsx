@@ -5,8 +5,14 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { SignUpForm } from '@neet/ui/components/auth/signup-form';
-import { AuthUser } from '@neet/auth';
+import { SignUpForm } from '@neet/ui/auth/signup-form';
+
+// Temporary type until @neet/auth is ready
+interface AuthUser {
+  id: string;
+  email: string;
+  onboarding_completed?: boolean;
+}
 
 export default function SignUpPage() {
   const router = useRouter();

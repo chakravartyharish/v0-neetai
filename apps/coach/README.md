@@ -1,10 +1,10 @@
 # NEETAI Coach Portal
 
-The comprehensive coaching institute management platform for NEET preparation.
+A comprehensive coaching platform for NEET exam preparation, built with Next.js 15, React 18, TypeScript, and Supabase.
 
 ## Overview
 
-The Coach Portal is a Next.js application designed for coaching institutes to manage their NEET preparation programs. It provides a complete solution for student management, assessment creation, analytics, and parent communication.
+The NEETAI Coach Portal is a modern, full-featured web application designed for coaching institutes to manage their NEET preparation programs. It provides a complete solution for student management, test creation, analytics, communication, and administrative tasks with advanced features like PWA support, real-time analytics, and GDPR compliance.
 
 ## Features
 
@@ -94,7 +94,16 @@ The Coach Portal is a Next.js application designed for coaching institutes to ma
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
+- `npm run lint:fix` - Fix ESLint issues automatically
 - `npm run type-check` - Run TypeScript compiler check
+- `npm run test` - Run unit tests
+- `npm run test:watch` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage report
+- `npm run test:e2e` - Run end-to-end tests
+- `npm run test:e2e:ui` - Run E2E tests with UI mode
+- `npm run test:a11y` - Run accessibility tests
+- `npm run format` - Format code with Prettier
+- `npm run analyze` - Analyze bundle size
 
 ## Project Structure
 
@@ -160,23 +169,108 @@ The coach portal integrates with the main NEETAI platform through:
 - **Analytics API**: Advanced performance analytics
 - **Sync APIs**: Real-time data synchronization
 
+## Testing Strategy
+
+### Unit & Integration Tests
+- **Framework**: Jest + React Testing Library + jsdom
+- **Location**: `src/**/__tests__/`
+- **Coverage**: Minimum 80% code coverage required
+- **Run**: `npm run test`
+- **Watch Mode**: `npm run test:watch`
+- **Coverage Report**: `npm run test:coverage`
+
+### End-to-End Tests
+- **Framework**: Playwright
+- **Location**: `tests/`
+- **Browsers**: Chromium, Firefox, WebKit, Mobile Chrome/Safari
+- **Features Tested**: Authentication, Dashboard, Student Management, Test Creation
+- **Run**: `npm run test:e2e`
+- **Debug Mode**: `npm run test:e2e:debug`
+
+### Accessibility Tests
+- **Framework**: jest-axe
+- **Standards**: WCAG 2.1 AA compliance
+- **Features**: Keyboard navigation, screen reader support, color contrast
+- **Run**: `npm run test:a11y`
+
+### Performance Tests
+- **Framework**: Lighthouse CI
+- **Metrics**: Performance (>80), Accessibility (>90), SEO (>80), Best Practices (>80)
+- **Pages Tested**: Home, Dashboard, Students, Analytics
+- **Run**: Automatically in CI/CD pipeline
+
+### Security Tests
+- **Tools**: npm audit, Snyk security scanning
+- **Coverage**: Dependency vulnerabilities, security headers, input validation
+- **Run**: Automatically in CI/CD pipeline
+
+### Cross-Browser Testing
+- **Desktop**: Chrome 90+, Firefox 90+, Safari 14+, Edge 90+
+- **Mobile**: iOS Safari 14+, Chrome Android 90+
+- **Testing**: Automated via Playwright in CI/CD
+
 ## Security & Compliance
 
-- Row Level Security (RLS) policies
-- Input validation and sanitization
-- Audit logging for critical actions
-- GDPR compliance tools
-- Rate limiting and DDoS protection
+- **Authentication**: Supabase Auth with JWT tokens
+- **Authorization**: Role-based access control (RBAC)
+- **Data Protection**: Field-level encryption for sensitive data
+- **Row Level Security (RLS)**: Database-level security policies
+- **Input Validation**: Zod schemas for all user inputs
+- **XSS Prevention**: Content Security Policy headers
+- **CSRF Protection**: SameSite cookies and CSRF tokens
+- **Rate Limiting**: Request throttling and abuse prevention
+- **Audit Logging**: Comprehensive action logging
+- **GDPR Compliance**: Data export, deletion, and consent management
+- **Security Headers**: Strict-Transport-Security, X-Frame-Options, etc.
 
 ## Deployment
 
-The application is deployed on Vercel with:
+### Vercel (Recommended)
 
-- Automatic deployments from Git
-- Environment variable management
-- CDN for static assets
-- Performance monitoring
-- SSL certificates
+1. **Connect Repository**
+   - Link your GitHub repository to Vercel
+   - Configure build settings:
+     - Build Command: `npm run build`
+     - Output Directory: `.next`
+     - Install Command: `npm install`
+
+2. **Environment Variables**
+   - Add all required environment variables
+   - Ensure production URLs and keys are configured
+   - Set `NODE_ENV=production`
+
+3. **Deploy**
+   ```bash
+   npm run build  # Test build locally first
+   vercel --prod  # Deploy to production
+   ```
+
+### CI/CD Pipeline
+
+The project includes a comprehensive GitHub Actions workflow:
+
+#### Continuous Integration
+- **Code Quality**: ESLint, Prettier, TypeScript checks
+- **Testing**: Unit tests with coverage (>80%), E2E tests
+- **Security**: npm audit, Snyk vulnerability scanning
+- **Performance**: Lighthouse CI performance testing
+- **Accessibility**: WCAG 2.1 compliance testing
+- **Cross-Browser**: Automated testing on multiple browsers
+
+#### Continuous Deployment
+- **Preview Deployments**: Automatic deployments for pull requests
+- **Production Deployment**: Automatic deployment on merge to main
+- **Environment Management**: Separate staging and production environments
+- **Rollback Support**: Quick rollback capabilities
+- **Monitoring**: Sentry error tracking and performance monitoring
+- **Notifications**: Slack integration for deployment status
+
+#### Deployment Features
+- **Zero-Downtime**: Rolling deployments with health checks
+- **CDN**: Global content delivery network
+- **SSL**: Automatic SSL certificate management
+- **Performance**: Edge caching and optimization
+- **Scaling**: Automatic scaling based on traffic
 
 ## Subscription Tiers
 

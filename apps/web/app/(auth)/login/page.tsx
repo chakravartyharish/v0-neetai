@@ -3,12 +3,18 @@
 
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { SignInForm } from '@neet/ui/components/auth/signin-form';
-import { AuthUser } from '@neet/auth';
+import { SignInForm } from '@neet/ui/auth/signin-form';
 
-export default function LoginPage() {
+// Temporary type until @neet/auth is ready
+interface AuthUser {
+  id: string;
+  email: string;
+  onboarding_completed?: boolean;
+}
+
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -113,5 +119,20 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }

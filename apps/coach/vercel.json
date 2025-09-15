@@ -4,16 +4,46 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "outputDirectory": ".next",
+  "regions": ["bom1", "sin1"],
+  "env": {
+    "NEXT_PUBLIC_APP_URL": "@app_url",
+    "NEXT_PUBLIC_API_BASE_URL": "@api_base_url",
+    "NEXT_PUBLIC_SUPABASE_URL": "@supabase_url",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "@supabase_anon_key",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key",
+    "API_KEY": "@api_key",
+    "WEBHOOK_SECRET": "@webhook_secret",
+    "ENCRYPTION_KEY": "@encryption_key",
+    "SENTRY_DSN": "@sentry_dsn"
+  },
+  "build": {
+    "env": {
+      "NEXT_TELEMETRY_DISABLED": "1"
+    }
+  },
   "functions": {
     "src/app/api/**/*.ts": {
       "maxDuration": 30
+    },
+    "src/app/api/webhooks/**/*.ts": {
+      "maxDuration": 60
     }
   },
   "redirects": [
     {
       "source": "/",
-      "destination": "/dashboard",
+      "destination": "/login",
       "permanent": false
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "/api/robots"
     }
   ],
   "headers": [
@@ -34,13 +64,59 @@
         },
         {
           "key": "Referrer-Policy",
-          "value": "origin-when-cross-origin"
+          "value": "strict-origin-when-cross-origin"
         },
         {
           "key": "Permissions-Policy",
-          "value": "camera=(), microphone=(), geolocation=()"
+          "value": "camera=(), microphone=(), geolocation=(), payment=()"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000; includeSubDomains; preload"
+        }
+      ]
+    },
+    {
+      "source": "/((?!api).*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.vercel.app *.supabase.co; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: *.supabase.co *.vercel.app; connect-src 'self' *.supabase.co *.vercel.app wss:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, PUT, DELETE, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization, X-Requested-With"
         }
       ]
     }
-  ]
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/cleanup",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/backup",
+      "schedule": "0 3 * * 0"
+    },
+    {
+      "path": "/api/cron/sync",
+      "schedule": "*/15 * * * *"
+    }
+  ],
+  "cleanUrls": true,
+  "trailingSlash": false
 }
