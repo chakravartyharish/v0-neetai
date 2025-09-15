@@ -14,5 +14,5 @@
     "next.config.ts",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "lib/ocr"]
+  "exclude": ["node_modules", "lib/ocr", "__tests__"]
 }

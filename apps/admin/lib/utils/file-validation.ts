@@ -125,7 +125,7 @@ export function validateFiles(
 
   fileValidations.forEach((validation, index) => {
     if (!validation.isValid) {
-      errors.push(`File ${index + 1} (${files[index].name}): ${validation.errors.join(', ')}`);
+      errors.push(`File ${index + 1} (${files[index]?.name || 'unknown'}): ${validation.errors.join(', ')}`);
     }
     warnings.push(...validation.warnings);
   });
