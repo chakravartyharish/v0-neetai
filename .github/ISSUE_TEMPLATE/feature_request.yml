@@ -1,0 +1,223 @@
+name: ✨ Feature Request
+description: Suggest a new feature or enhancement for NEETAI
+title: "[FEATURE] "
+labels: ["enhancement", "feature-request"]
+assignees:
+  - chakravartyharish
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a new feature! ✨
+        
+        Your ideas help make NEETAI better for everyone. Please provide as much detail as possible.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm the following before submitting a feature request
+      options:
+        - label: I have searched existing issues to ensure this feature hasn't been requested before
+          required: true
+        - label: I have checked the roadmap and this feature isn't already planned
+          required: true
+        - label: This feature aligns with the project's goals and scope
+          required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 📝 Feature Summary
+      description: A brief, clear summary of the feature you'd like to see
+      placeholder: In one or two sentences, what would this feature do?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: 🎯 Feature Category
+      description: Which area of the application would this feature affect?
+      options:
+        - Authentication & User Management
+        - Quiz & Question System
+        - AI & Machine Learning
+        - Analytics & Progress Tracking
+        - UI/UX Improvements
+        - Mobile App Features
+        - API & Backend
+        - Performance & Optimization
+        - Accessibility
+        - Developer Experience
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 📈 Priority Level
+      description: How important is this feature to you?
+      options:
+        - Critical (Essential for core functionality)
+        - High (Significantly improves user experience)
+        - Medium (Nice to have, good enhancement)
+        - Low (Minor improvement, not urgent)
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 🎯 Problem Statement
+      description: What problem does this feature solve? What user need does it address?
+      placeholder: |
+        Describe the problem or limitation you're experiencing:
+        - What is the current situation?
+        - Why is this a problem for users?
+        - How does this impact the user experience?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 💡 Proposed Solution
+      description: Describe how you envision this feature working
+      placeholder: |
+        Describe your proposed solution in detail:
+        - How should this feature work?
+        - What should the user experience be like?
+        - Any specific behavior or functionality?
+    validations:
+      required: true
+
+  - type: textarea
+    id: user-story
+    attributes:
+      label: 👤 User Story
+      description: Frame this as a user story to help us understand the context
+      placeholder: |
+        As a [type of user],
+        I want [what you want],
+        So that [why you want it].
+        
+        Example:
+        As a NEET aspirant,
+        I want to track my daily study streaks,
+        So that I can stay motivated and maintain consistent study habits.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 🔄 Alternative Solutions
+      description: Have you considered any alternative approaches?
+      placeholder: |
+        - Are there other ways to solve this problem?
+        - What workarounds are you currently using?
+        - Are there existing features that partially address this?
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: 📋 Use Cases
+      description: Describe specific scenarios where this feature would be useful
+      placeholder: |
+        1. Scenario 1: ...
+        2. Scenario 2: ...
+        3. Scenario 3: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: 🎨 Mockups/Wireframes
+      description: Any visual representations of your idea (optional)
+      placeholder: |
+        If you have mockups, wireframes, or sketches, please share them here.
+        You can drag and drop images or provide links to design files.
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: ✅ Acceptance Criteria
+      description: How will we know when this feature is complete?
+      placeholder: |
+        Define what "done" looks like:
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        - [ ] Criterion 3
+      value: |
+        - [ ] 
+        - [ ] 
+        - [ ] 
+
+  - type: dropdown
+    id: target-users
+    attributes:
+      label: 👥 Target Users
+      description: Who would benefit most from this feature?
+      options:
+        - NEET Aspirants (Students)
+        - Teachers/Educators
+        - Parents/Guardians
+        - Administrators
+        - Developers
+        - All Users
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: business-value
+    attributes:
+      label: 💼 Business Value
+      description: What value would this feature bring to the platform?
+      placeholder: |
+        Consider:
+        - How might this increase user engagement?
+        - Could this attract new users or retain existing ones?
+        - Does this align with our product goals?
+        - Any potential revenue impact?
+
+  - type: textarea
+    id: technical-considerations
+    attributes:
+      label: ⚙️ Technical Considerations
+      description: Any technical aspects to consider (if you have technical knowledge)
+      placeholder: |
+        If you have technical insights:
+        - Any API changes needed?
+        - Database schema considerations?
+        - Third-party integrations required?
+        - Performance implications?
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📝 Additional Context
+      description: Any other information that might be helpful
+      placeholder: |
+        - References to similar features in other apps
+        - Research or data supporting this request
+        - Timeline considerations
+        - Dependencies on other features
+
+  - type: checkboxes
+    id: volunteer
+    attributes:
+      label: 🤝 Contribution
+      description: Would you be willing to help implement this feature?
+      options:
+        - label: I would be willing to contribute to the design/research for this feature
+          required: false
+        - label: I would be willing to help with testing this feature
+          required: false
+        - label: I would be willing to submit a pull request to implement this feature
+          required: false

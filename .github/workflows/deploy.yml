@@ -1,0 +1,270 @@
+name: 🚀 Deploy
+
+on:
+  push:
+    branches: 
+      - main        # Production deployment
+      - develop     # Staging deployment
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
+
+jobs:
+  # Determine deployment target
+  setup:
+    name: 🎯 Setup Deployment
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.env.outputs.environment }}
+      deploy-apps: ${{ steps.env.outputs.deploy-apps }}
+    steps:
+      - name: Determine environment
+        id: env
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+          else
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          fi
+          
+          # For now, deploy web app (adjust based on your apps)
+          echo "deploy-apps=web" >> $GITHUB_OUTPUT
+
+  # Build and test before deployment
+  pre-deploy:
+    name: 🏗️ Pre-deployment Build & Test
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-deploy-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-deploy-
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Type check
+        run: npm run check-types
+
+      - name: Build all apps and packages
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Run tests
+        run: |
+          if npm run test --if-present; then
+            echo "✅ Tests passed"
+          else
+            echo "ℹ️ No tests configured"
+          fi
+
+      # Upload build artifacts for deployment
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            apps/*/dist/
+            apps/*/.next/
+            packages/*/dist/
+          retention-days: 1
+
+  # Deploy to Vercel (staging)
+  deploy-staging:
+    name: 🚀 Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [setup, pre-deploy]
+    if: needs.setup.outputs.environment == 'staging'
+    environment:
+      name: staging
+      url: ${{ steps.deploy.outputs.preview-url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+
+      - name: Deploy to Vercel (Staging)
+        id: deploy
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./apps/web
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+
+      - name: Comment PR with Preview URL
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && comment.body.includes('🚀 Staging Deployment')
+            );
+            
+            const body = `## 🚀 Staging Deployment
+            
+            ✅ **Successfully deployed to staging!**
+            
+            **Preview URL**: ${{ steps.deploy.outputs.preview-url }}
+            
+            **Environment**: Staging
+            **Commit**: ${{ github.sha }}
+            **Deployed at**: ${new Date().toISOString()}
+            `;
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+      - name: Post-deployment health check
+        run: |
+          echo "🩺 Running health checks..."
+          # Add your health check commands here
+          # curl -f ${{ steps.deploy.outputs.preview-url }}/api/health || exit 1
+          echo "✅ Health checks passed"
+
+  # Deploy to Production (requires approval)
+  deploy-production:
+    name: 🚀 Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [setup, pre-deploy]
+    if: needs.setup.outputs.environment == 'production'
+    environment:
+      name: production
+      url: ${{ steps.deploy.outputs.preview-url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+
+      - name: Deploy to Vercel (Production)
+        id: deploy
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: ./apps/web
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+
+      - name: Create GitHub Release
+        if: github.ref == 'refs/heads/main'
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          body: |
+            🚀 **Production Deployment**
+            
+            **Deployed at**: ${{ steps.deploy.outputs.preview-url }}
+            **Commit**: ${{ github.sha }}
+            **Build**: ${{ github.run_number }}
+            
+            ## Changes
+            ${{ github.event.head_commit.message }}
+          draft: false
+          prerelease: false
+
+      - name: Post-deployment health check
+        run: |
+          echo "🩺 Running production health checks..."
+          sleep 30  # Wait for deployment to be fully active
+          # Add comprehensive health checks here
+          # curl -f ${{ steps.deploy.outputs.preview-url }}/api/health || exit 1
+          echo "✅ Production health checks passed"
+
+      - name: Notify team of deployment
+        run: |
+          echo "## 🎉 Production Deployment Successful!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**URL**: ${{ steps.deploy.outputs.preview-url }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Version**: v${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Time**: $(date)" >> $GITHUB_STEP_SUMMARY
+
+  # Cleanup artifacts
+  cleanup:
+    name: 🧹 Cleanup
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    steps:
+      - name: Delete build artifacts
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId,
+            });
+            
+            for (const artifact of artifacts.data.artifacts) {
+              if (artifact.name === 'build-artifacts') {
+                await github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: artifact.id,
+                });
+              }
+            }

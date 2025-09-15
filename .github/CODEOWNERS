@@ -1,0 +1,164 @@
+# CODEOWNERS for NEETAI Repository
+# This file defines code ownership for the NEETAI monorepo
+# Each line is a file pattern and the users/teams responsible for reviewing changes
+
+# Global repository owners (fallback for unmatched paths)
+* @chakravartyharish
+
+# Root configuration files
+package.json @chakravartyharish
+package-lock.json @chakravartyharish
+turbo.json @chakravartyharish
+.gitignore @chakravartyharish
+.npmrc @chakravartyharish
+README.md @chakravartyharish
+.warp.md @chakravartyharish
+
+# Environment and configuration
+.env* @chakravartyharish
+*.config.js @chakravartyharish
+*.config.ts @chakravartyharish
+next.config.js @chakravartyharish
+tailwind.config.* @chakravartyharish
+tsconfig.json @chakravartyharish
+
+# GitHub workflows and templates
+.github/ @chakravartyharish
+.github/workflows/ @chakravartyharish
+.github/ISSUE_TEMPLATE/ @chakravartyharish
+.github/pull_request_template.md @chakravartyharish
+.github/dependabot.yml @chakravartyharish
+.github/CODEOWNERS @chakravartyharish
+
+# Documentation
+docs/ @chakravartyharish
+*.md @chakravartyharish
+CONTRIBUTING.md @chakravartyharish
+
+# Apps directory
+apps/ @chakravartyharish
+
+# Web application
+apps/web/ @chakravartyharish
+apps/web/package.json @chakravartyharish
+apps/web/src/app/ @chakravartyharish
+apps/web/src/components/ @chakravartyharish
+apps/web/src/lib/ @chakravartyharish
+apps/web/public/ @chakravartyharish
+
+# Mobile application (if exists)
+apps/mobile/ @chakravartyharish
+apps/mobile/package.json @chakravartyharish
+
+# Documentation site (if exists)
+apps/docs/ @chakravartyharish
+
+# Packages directory
+packages/ @chakravartyharish
+
+# Authentication package
+packages/auth/ @chakravartyharish
+packages/auth/src/ @chakravartyharish
+packages/auth/package.json @chakravartyharish
+
+# Database package
+packages/database/ @chakravartyharish
+packages/database/src/ @chakravartyharish
+packages/database/migrations/ @chakravartyharish
+packages/database/schema/ @chakravartyharish
+packages/database/package.json @chakravartyharish
+
+# UI package
+packages/ui/ @chakravartyharish
+packages/ui/src/ @chakravartyharish
+packages/ui/components/ @chakravartyharish
+packages/ui/package.json @chakravartyharish
+
+# Configuration package
+packages/config/ @chakravartyharish
+packages/config/src/ @chakravartyharish
+packages/config/package.json @chakravartyharish
+
+# AI package
+packages/ai/ @chakravartyharish
+packages/ai/src/ @chakravartyharish
+packages/ai/package.json @chakravartyharish
+
+# Analytics package
+packages/analytics/ @chakravartyharish
+packages/analytics/src/ @chakravartyharish
+packages/analytics/package.json @chakravartyharish
+
+# Utils package
+packages/utils/ @chakravartyharish
+packages/utils/src/ @chakravartyharish
+packages/utils/package.json @chakravartyharish
+
+# Types package
+packages/types/ @chakravartyharish
+packages/types/src/ @chakravartyharish
+packages/types/package.json @chakravartyharish
+
+# Supabase configuration
+supabase/ @chakravartyharish
+supabase/config.toml @chakravartyharish
+supabase/migrations/ @chakravartyharish
+supabase/functions/ @chakravartyharish
+
+# BMAD-core agents and workflows
+.bmad-core/ @chakravartyharish
+agents/ @chakravartyharish
+
+# Product Requirements Documents and specifications
+*prd*.md @chakravartyharish
+*PRD*.md @chakravartyharish
+*design*.md @chakravartyharish
+*architecture*.md @chakravartyharish
+
+# Sample data and test files
+sample-*.md @chakravartyharish
+*example*.md @chakravartyharish
+
+# Security-sensitive files (require extra review)
+.env.production @chakravartyharish
+.env.local @chakravartyharish
+packages/auth/src/lib/jwt.ts @chakravartyharish
+packages/database/src/migrations/ @chakravartyharish
+
+# Performance-critical files
+packages/ui/src/components/ @chakravartyharish
+apps/web/src/app/layout.tsx @chakravartyharish
+apps/web/src/middleware.ts @chakravartyharish
+
+# Build and deployment files
+Dockerfile @chakravartyharish
+docker-compose*.yml @chakravartyharish
+vercel.json @chakravartyharish
+.vercelignore @chakravartyharish
+
+# VS Code configuration
+.vscode/ @chakravartyharish
+
+# IDE configurations
+.idea/ @chakravartyharish
+*.iml @chakravartyharish
+
+# Specific technology stacks requiring domain expertise
+# TypeScript configuration files
+tsconfig*.json @chakravartyharish
+
+# Linting and formatting
+.eslintrc* @chakravartyharish
+.prettierrc* @chakravartyharish
+.prettierignore @chakravartyharish
+
+# Testing configuration
+jest.config.* @chakravartyharish
+vitest.config.* @chakravartyharish
+playwright.config.* @chakravartyharish
+cypress.config.* @chakravartyharish
+
+# Package manager files
+pnpm-lock.yaml @chakravartyharish
+yarn.lock @chakravartyharish
+bun.lockb @chakravartyharish

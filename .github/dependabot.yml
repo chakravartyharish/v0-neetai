@@ -1,0 +1,239 @@
+version: 2
+updates:
+  # Main package.json dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    assignees:
+      - "chakravartyharish"
+    reviewers:
+      - "chakravartyharish"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "automated"
+    groups:
+      # Group React-related updates
+      react:
+        patterns:
+          - "react*"
+          - "@types/react*"
+          - "next"
+      # Group TypeScript-related updates
+      typescript:
+        patterns:
+          - "typescript"
+          - "@types/*"
+          - "eslint*"
+          - "@typescript-eslint/*"
+      # Group UI/CSS-related updates
+      ui:
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/*"
+          - "framer-motion"
+          - "lucide-react"
+          - "class-variance-authority"
+          - "clsx"
+          - "cn"
+      # Group database-related updates
+      database:
+        patterns:
+          - "@supabase/*"
+          - "drizzle-orm"
+          - "postgres"
+          - "@planetscale/*"
+      # Group AI/ML-related updates
+      ai:
+        patterns:
+          - "@ai-sdk/*"
+          - "openai"
+          - "ai"
+          - "@anthropic-ai/*"
+          - "langchain"
+      # Group testing-related updates
+      testing:
+        patterns:
+          - "jest"
+          - "@jest/*"
+          - "vitest"
+          - "@testing-library/*"
+          - "playwright"
+          - "cypress"
+      # Group build tools
+      build-tools:
+        patterns:
+          - "turbo"
+          - "webpack"
+          - "vite"
+          - "@vitejs/*"
+          - "esbuild"
+          - "rollup"
+    open-pull-requests-limit: 5
+    pull-request-branch-name:
+      separator: "/"
+    target-branch: "develop"
+
+  # Web app specific dependencies
+  - package-ecosystem: "npm"
+    directory: "/apps/web"
+    schedule:
+      interval: "weekly" 
+      day: "tuesday"
+      time: "06:00"
+    assignees:
+      - "chakravartyharish"
+    commit-message:
+      prefix: "deps(web)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "web-app"
+      - "automated"
+    open-pull-requests-limit: 3
+    target-branch: "develop"
+
+  # Mobile app specific dependencies (if exists)
+  - package-ecosystem: "npm"
+    directory: "/apps/mobile"
+    schedule:
+      interval: "weekly"
+      day: "wednesday" 
+      time: "06:00"
+    assignees:
+      - "chakravartyharish"
+    commit-message:
+      prefix: "deps(mobile)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "mobile-app"
+      - "automated"
+    open-pull-requests-limit: 3
+    target-branch: "develop"
+
+  # GitHub Actions workflow dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "06:00"
+    assignees:
+      - "chakravartyharish"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "github-actions"
+      - "ci-cd"
+      - "automated"
+    open-pull-requests-limit: 2
+    target-branch: "develop"
+
+  # Docker dependencies (if using Docker)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "1"
+      time: "06:00"
+    assignees:
+      - "chakravartyharish"
+    commit-message:
+      prefix: "docker"
+      include: "scope"
+    labels:
+      - "docker"
+      - "infrastructure"
+      - "automated"
+    open-pull-requests-limit: 1
+    target-branch: "develop"
+
+  # Package directories - Auth package
+  - package-ecosystem: "npm"
+    directory: "/packages/auth"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "06:00"
+    assignees:
+      - "chakravartyharish"
+    commit-message:
+      prefix: "deps(auth)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "auth-package"
+      - "automated"
+    open-pull-requests-limit: 2
+    target-branch: "develop"
+
+  # Package directories - Database package
+  - package-ecosystem: "npm"
+    directory: "/packages/database"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "07:00"
+    assignees:
+      - "chakravartyharish"
+    commit-message:
+      prefix: "deps(database)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "database-package"
+      - "automated"
+    open-pull-requests-limit: 2
+    target-branch: "develop"
+
+  # Package directories - UI package
+  - package-ecosystem: "npm"
+    directory: "/packages/ui"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "08:00"
+    assignees:
+      - "chakravartyharish"
+    commit-message:
+      prefix: "deps(ui)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "ui-package"
+      - "automated"
+    open-pull-requests-limit: 2
+    target-branch: "develop"
+
+  # Security updates - daily check for all ecosystems
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "06:00"
+    assignees:
+      - "chakravartyharish"
+    commit-message:
+      prefix: "security"
+      include: "scope"
+    labels:
+      - "security"
+      - "high-priority"
+      - "automated"
+    open-pull-requests-limit: 10
+    # Security updates go directly to main for faster deployment
+    target-branch: "main"
+    # Only security updates in this configuration
+    allow:
+      - dependency-type: "direct"
+        update-type: "security"
+      - dependency-type: "indirect" 
+        update-type: "security"
