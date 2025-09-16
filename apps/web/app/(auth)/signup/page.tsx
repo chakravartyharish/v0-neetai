@@ -1,32 +1,68 @@
-// Sign Up Page for NEET Prep AI Platform
-// Story 1.1: User Authentication System
-
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { SignUpForm } from '@neet/ui/auth/signup-form';
-
-// Temporary type until @neet/auth is ready
-interface AuthUser {
-  id: string;
-  email: string;
-  onboarding_completed?: boolean;
-}
 
 export default function SignUpPage() {
   const router = useRouter();
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    fullName: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSignUpSuccess = (user: AuthUser) => {
-    console.log('Sign up successful:', user);
-    
-    // Show success message and redirect to verification page
-    router.push('/auth/verify-email?email=' + encodeURIComponent(user.email));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+    if (error) setError('');
   };
 
-  const handleSignUpError = (error: string) => {
-    console.error('Sign up error:', error);
-    // Error handling is done within the SignUpForm component
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          full_name: formData.fullName,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Failed to create account');
+        return;
+      }
+
+      // Success - redirect to verification page
+      router.push('/auth/verify-email?email=' + encodeURIComponent(formData.email));
+    } catch (error) {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -40,19 +76,108 @@ export default function SignUpPage() {
             </svg>
           </div>
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            NEET Prep AI
+            Create Account
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Your AI-powered companion for NEET success
+            Join NEET Prep AI and accelerate your preparation
           </p>
         </div>
 
+        {/* Error */}
+        {error && (
+          <div className="mb-6">
+            <div className="bg-red-50 border border-red-200 rounded-md p-3">
+              <p className="text-sm text-red-600 text-center">{error}</p>
+            </div>
+          </div>
+        )}
+
         {/* Sign Up Form */}
-        <SignUpForm
-          onSuccess={handleSignUpSuccess}
-          onError={handleSignUpError}
-          className="w-full"
-        />
+        <form onSubmit={handleSubmit} className="space-y-6 bg-white rounded-lg shadow-md p-6">
+          <div>
+            <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
+              Full Name
+            </label>
+            <input
+              id="fullName"
+              name="fullName"
+              type="text"
+              required
+              value={formData.fullName}
+              onChange={handleInputChange}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter your full name"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              Email address
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={formData.email}
+              onChange={handleInputChange}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter your email"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="new-password"
+              required
+              value={formData.password}
+              onChange={handleInputChange}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Create a password (min 6 characters)"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+              Confirm Password
+            </label>
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              autoComplete="new-password"
+              required
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Confirm your password"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Creating Account...' : 'Create Account'}
+          </button>
+
+          <div className="text-center">
+            <span className="text-sm text-gray-600">
+              Already have an account?{' '}
+              <a href="/login" className="font-medium text-blue-600 hover:text-blue-500">
+                Sign in
+              </a>
+            </span>
+          </div>
+        </form>
 
         {/* Additional Links */}
         <div className="mt-8 text-center">

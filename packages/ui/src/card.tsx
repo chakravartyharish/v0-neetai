@@ -4,27 +4,29 @@ export function Card({
   title,
   children,
   href,
+  className,
 }: {
   title: string;
   children: ReactNode;
   href: string;
+  className?: string;
 }) {
   return (
     <a
-      className="ui:group ui:rounded-lg ui:border ui:border-transparent ui:px-5 ui:py-4 ui:transition-colors hover:ui:border-neutral-700 hover:ui:bg-neutral-800/30"
+      className={`group block p-6 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-lg transition-all duration-300 transform hover:scale-105 ${className || ""}`}
       href={`${href}?utm_source=create-turbo&utm_medium=with-tailwind&utm_campaign=create-turbo"`}
       rel="noopener noreferrer"
       target="_blank"
     >
-      <h2 className="ui:mb-3 ui:text-2xl ui:font-semibold">
+      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-3 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
         {title}{" "}
-        <span className="ui:inline-block ui:transition-transform group-hover:ui:translate-x-1 motion-reduce:ui:transform-none">
-          -&gt;
+        <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none text-blue-500">
+          →
         </span>
       </h2>
-      <p className="ui:m-0 ui:max-w-[30ch] ui:text-sm ui:opacity-50">
+      <div className="text-gray-600 dark:text-gray-300 leading-relaxed">
         {children}
-      </p>
+      </div>
     </a>
   );
 }

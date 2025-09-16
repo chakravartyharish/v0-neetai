@@ -3,9 +3,7 @@
 
 'use client';
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from './supabase-types';
 
 // Environment variables validation
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -17,11 +15,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 // Client-side Supabase client (for React components)
 export const createClientSupabase = () => {
-  return createClientComponentClient<Database>();
+  return createClient(supabaseUrl, supabaseAnonKey);
 };
 
 // Direct client for legacy usage
-export const supabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey);
+export const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
 // Auth configuration (client-safe values only)
 export const authConfig = {

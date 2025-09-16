@@ -1,43 +1,82 @@
-// Login Page for NEET Prep AI Platform
-// Story 1.1: User Authentication System
-
 'use client';
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { SignInForm } from '@neet/ui/auth/signin-form';
-
-// Temporary type until @neet/auth is ready
-interface AuthUser {
-  id: string;
-  email: string;
-  onboarding_completed?: boolean;
-}
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
-  // Get redirect URL from search params (for after successful login)
-  const redirectTo = searchParams.get('redirect') || '/dashboard';
-  const message = searchParams.get('message'); // For displaying messages like "Please login to continue"
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSignInSuccess = (user: AuthUser) => {
-    console.log('Sign in successful:', user);
-    
-    // Check if user has completed onboarding
-    if (!user.onboarding_completed) {
-      router.push('/onboarding');
-      return;
-    }
-    
-    // Redirect to intended destination or dashboard
-    router.push(redirectTo);
+  const redirectTo = searchParams.get('redirect') || '/dashboard';
+  const message = searchParams.get('message');
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value
+    }));
+    if (error) setError('');
   };
 
-  const handleSignInError = (error: string) => {
-    console.error('Sign in error:', error);
-    // Error handling is done within the SignInForm component
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Failed to sign in');
+        return;
+      }
+
+      // Success - redirect to dashboard or intended page
+      router.push(redirectTo);
+    } catch (error) {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async (email: string, password: string) => {
+    setFormData({ email, password });
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Failed to sign in');
+        return;
+      }
+
+      router.push('/dashboard');
+    } catch (error) {
+      setError('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -58,7 +97,7 @@ function LoginContent() {
           </p>
         </div>
 
-        {/* Message from redirect (e.g., "Please login to continue") */}
+        {/* Message */}
         {message && (
           <div className="mb-6">
             <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
@@ -67,16 +106,79 @@ function LoginContent() {
           </div>
         )}
 
-        {/* Sign In Form */}
-        <SignInForm
-          onSuccess={handleSignInSuccess}
-          onError={handleSignInError}
-          className="w-full"
-        />
+        {/* Error */}
+        {error && (
+          <div className="mb-6">
+            <div className="bg-red-50 border border-red-200 rounded-md p-3">
+              <p className="text-sm text-red-600 text-center">{error}</p>
+            </div>
+          </div>
+        )}
 
-        {/* Additional Help */}
+        {/* Sign In Form */}
+        <form onSubmit={handleSubmit} className="space-y-6 bg-white rounded-lg shadow-md p-6">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              Email address
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={formData.email}
+              onChange={handleInputChange}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter your email"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              required
+              value={formData.password}
+              onChange={handleInputChange}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter your password"
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="text-sm">
+              <a href="/auth/forgot-password" className="font-medium text-blue-600 hover:text-blue-500">
+                Forgot your password?
+              </a>
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+
+          <div className="text-center">
+            <span className="text-sm text-gray-600">
+              Don't have an account?{' '}
+              <a href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
+                Sign up
+              </a>
+            </span>
+          </div>
+        </form>
+
+        {/* Demo Access */}
         <div className="mt-8 space-y-4">
-          {/* Quick Access for Demo */}
           <div className="bg-gray-50 rounded-lg p-4 text-center">
             <h3 className="text-sm font-medium text-gray-900 mb-2">Demo Access</h3>
             <p className="text-xs text-gray-600 mb-3">
@@ -84,14 +186,16 @@ function LoginContent() {
             </p>
             <div className="space-y-2">
               <button
-                onClick={() => {/* Demo student login */}}
-                className="w-full text-xs bg-white border border-gray-200 rounded px-3 py-2 hover:bg-gray-50"
+                onClick={() => handleDemoLogin('hkchakravarty@gmail.com', 'demo123')}
+                disabled={loading}
+                className="w-full text-xs bg-white border border-gray-200 rounded px-3 py-2 hover:bg-gray-50 disabled:opacity-50"
               >
-                Demo Student (student@neetai.com)
+                Demo Student (hkchakravarty@gmail.com)
               </button>
               <button
-                onClick={() => {/* Demo coach login */}}
-                className="w-full text-xs bg-white border border-gray-200 rounded px-3 py-2 hover:bg-gray-50"
+                onClick={() => handleDemoLogin('coach@neetai.com', 'demo123')}
+                disabled={loading}
+                className="w-full text-xs bg-white border border-gray-200 rounded px-3 py-2 hover:bg-gray-50 disabled:opacity-50"
               >
                 Demo Coach (coach@neetai.com)
               </button>
@@ -103,11 +207,6 @@ function LoginContent() {
             <div className="text-sm">
               <a href="/auth/help" className="font-medium text-blue-600 hover:text-blue-500">
                 Having trouble signing in?
-              </a>
-            </div>
-            <div className="text-sm">
-              <a href="/auth/verify-email" className="text-blue-600 hover:text-blue-500">
-                Resend verification email
               </a>
             </div>
             <div className="mt-4 text-xs text-gray-500">

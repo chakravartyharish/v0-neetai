@@ -19,17 +19,17 @@
     "diagnose:ocr": "tsx lib/ocr/diagnose-ocr.ts"
   },
   "dependencies": {
-    "@neet/database": "*",
     "@neet/auth": "*",
     "@neet/config": "*",
+    "@neet/database": "*",
     "@repo/ui": "*",
-    "next": "^15.4.2",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
+    "next": "^15.5.3",
     "pdf2json": "^3.1.5",
-    "tesseract.js": "^5.0.5",
+    "pdf2pic": "^2.2.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
     "sharp": "^0.33.4",
-    "pdf2pic": "^2.2.0"
+    "tesseract.js": "^5.0.5"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^15.4.6",
@@ -51,7 +51,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.1.5",
-    "typescript": "5.9.2",
-    "tsx": "^4.7.1"
+    "tsx": "^4.7.1",
+    "typescript": "5.9.2"
   }
 }

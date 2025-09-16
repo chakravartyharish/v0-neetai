@@ -3,44 +3,65 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase, handleAuthError } from '@neet/auth';
-import { z } from 'zod';
 
-// Validation schema
-const signUpSchema = z.object({
-  email: z.string().email('Invalid email format'),
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
-  full_name: z.string().min(2, 'Full name must be at least 2 characters'),
-  role: z.enum(['student', 'coach', 'parent', 'admin']).optional().default('student'),
-  phone: z.string().optional(),
-});
+// Basic validation function
+function validateSignUpData(data: any) {
+  const errors: string[] = [];
+
+  if (!data.email || typeof data.email !== 'string') {
+    errors.push('Email is required');
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    errors.push('Invalid email format');
+  }
+
+  if (!data.password || typeof data.password !== 'string') {
+    errors.push('Password is required');
+  } else {
+    if (data.password.length < 8) {
+      errors.push('Password must be at least 8 characters');
+    }
+    if (!/[A-Z]/.test(data.password)) {
+      errors.push('Password must contain at least one uppercase letter');
+    }
+    if (!/[a-z]/.test(data.password)) {
+      errors.push('Password must contain at least one lowercase letter');
+    }
+    if (!/[0-9]/.test(data.password)) {
+      errors.push('Password must contain at least one number');
+    }
+  }
+
+  if (!data.full_name || typeof data.full_name !== 'string' || data.full_name.length < 2) {
+    errors.push('Full name must be at least 2 characters');
+  }
+
+  if (data.role && !['student', 'coach', 'parent', 'admin'].includes(data.role)) {
+    errors.push('Invalid role specified');
+  }
+
+  return errors;
+}
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = createServerSupabase();
-    
+
     // Parse request body
     const body = await request.json();
-    
+
     // Validate input
-    const validation = signUpSchema.safeParse(body);
-    if (!validation.success) {
+    const validationErrors = validateSignUpData(body);
+    if (validationErrors.length > 0) {
       return NextResponse.json(
-        { 
-          error: 'Validation failed', 
-          details: validation.error.errors.map(err => ({
-            field: err.path.join('.'),
-            message: err.message
-          }))
+        {
+          error: 'Validation failed',
+          details: validationErrors
         },
         { status: 400 }
       );
     }
 
-    const { email, password, full_name, role, phone } = validation.data;
+    const { email, password, full_name, role = 'student', phone } = body;
 
     // Check if user already exists
     const { data: existingUser } = await supabase

@@ -3,37 +3,44 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase, handleAuthError } from '@neet/auth';
-import { z } from 'zod';
 
-// Validation schema
-const signInSchema = z.object({
-  email: z.string().email('Invalid email format'),
-  password: z.string().min(1, 'Password is required'),
-});
+// Basic validation function
+function validateSignInData(data: any) {
+  const errors: string[] = [];
+
+  if (!data.email || typeof data.email !== 'string') {
+    errors.push('Email is required');
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    errors.push('Invalid email format');
+  }
+
+  if (!data.password || typeof data.password !== 'string') {
+    errors.push('Password is required');
+  }
+
+  return errors;
+}
 
 export async function POST(request: NextRequest) {
   try {
     const supabase = createServerSupabase();
-    
+
     // Parse request body
     const body = await request.json();
-    
+
     // Validate input
-    const validation = signInSchema.safeParse(body);
-    if (!validation.success) {
+    const validationErrors = validateSignInData(body);
+    if (validationErrors.length > 0) {
       return NextResponse.json(
-        { 
-          error: 'Validation failed', 
-          details: validation.error.errors.map(err => ({
-            field: err.path.join('.'),
-            message: err.message
-          }))
+        {
+          error: 'Validation failed',
+          details: validationErrors
         },
         { status: 400 }
       );
     }
 
-    const { email, password } = validation.data;
+    const { email, password } = body;
 
     // Sign in with Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
@@ -58,23 +65,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get complete user data
-    const { data: student, error: studentError } = await supabase
-      .from('students')
-      .select(`
-        *,
-        user_profiles (*)
-      `)
+    // Get additional user profile data
+    const { data: coachProfile } = await supabase
+      .from('coach_users')
+      .select('*')
       .eq('id', authData.user.id)
       .single();
 
-    if (studentError) {
-      console.error('Error fetching user data:', studentError);
-      return NextResponse.json(
-        { error: 'Failed to fetch user data' },
-        { status: 500 }
-      );
-    }
+    const { data: userProfile } = await supabase
+      .from('comprehensive_user_profiles')
+      .select('*')
+      .eq('student_id', authData.user.id)
+      .single();
 
     // Check if email is verified
     if (!authData.user.email_confirmed_at) {
@@ -90,20 +92,18 @@ export async function POST(request: NextRequest) {
 
     // Return success response with user data
     return NextResponse.json(
-      { 
+      {
         message: 'Sign in successful',
         user: {
-          id: student.id,
-          email: student.email,
-          full_name: student.full_name,
-          phone: student.phone,
-          role: student.role,
-          tier: student.tier,
-          onboarding_completed: student.onboarding_completed,
-          preferences: student.preferences,
-          profile: student.user_profiles?.[0] || null,
-          created_at: student.created_at,
-          updated_at: student.updated_at,
+          id: authData.user.id,
+          email: authData.user.email,
+          full_name: coachProfile?.full_name || authData.user.user_metadata?.full_name || 'User',
+          role: coachProfile?.role || 'student',
+          avatar_url: coachProfile?.avatar_url || null,
+          institute_id: coachProfile?.institute_id || null,
+          profile: userProfile || null,
+          created_at: authData.user.created_at,
+          updated_at: authData.user.updated_at,
         },
         session: {
           access_token: authData.session?.access_token,

@@ -1,9 +1,7 @@
 // Supabase client configuration for NEET Prep AI Platform
 // Story 1.1: User Authentication System
 
-import { createClientComponentClient, createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
 
 // Database type definitions
 export interface Database {
@@ -106,14 +104,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 // Client-side Supabase client (for React components)
 export const createClientSupabase = () => {
-  return createClientComponentClient<Database>();
+  return createClient<Database>(supabaseUrl, supabaseAnonKey);
 };
 
 // Server-side Supabase client (for Server Components and API routes)
 export const createServerSupabase = () => {
-  return createServerComponentClient<Database>({
-    cookies,
-  });
+  return createClient<Database>(supabaseUrl, supabaseAnonKey);
 };
 
 // Service role client (for admin operations)

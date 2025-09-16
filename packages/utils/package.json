@@ -6,6 +6,11 @@
   "exports": {
     ".": "./index.ts"
   },
+  "scripts": {
+    "build": "echo 'TypeScript package - no build needed'",
+    "lint": "echo 'No lint script for now'",
+    "check-types": "echo 'No type check script for now'"
+  },
   "dependencies": {
     "clsx": "^2.0.0",
     "tailwind-merge": "^2.0.0"

@@ -3,25 +3,48 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createServerSupabase, handleAuthError } from '@neet/auth';
-import { z } from 'zod';
 
-// Validation schema for password reset request
-const resetRequestSchema = z.object({
-  email: z.string().email('Invalid email format'),
-});
+// Basic validation functions
+function validateEmailData(data: any) {
+  const errors: string[] = [];
 
-// Validation schema for password update
-const resetPasswordSchema = z.object({
-  password: z.string()
-    .min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number'),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+  if (!data.email || typeof data.email !== 'string') {
+    errors.push('Email is required');
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    errors.push('Invalid email format');
+  }
+
+  return errors;
+}
+
+function validatePasswordData(data: any) {
+  const errors: string[] = [];
+
+  if (!data.password || typeof data.password !== 'string') {
+    errors.push('Password is required');
+  } else {
+    if (data.password.length < 8) {
+      errors.push('Password must be at least 8 characters');
+    }
+    if (!/[A-Z]/.test(data.password)) {
+      errors.push('Password must contain at least one uppercase letter');
+    }
+    if (!/[a-z]/.test(data.password)) {
+      errors.push('Password must contain at least one lowercase letter');
+    }
+    if (!/[0-9]/.test(data.password)) {
+      errors.push('Password must contain at least one number');
+    }
+  }
+
+  if (!data.confirmPassword || typeof data.confirmPassword !== 'string') {
+    errors.push('Confirm password is required');
+  } else if (data.password !== data.confirmPassword) {
+    errors.push("Passwords don't match");
+  }
+
+  return errors;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,21 +54,18 @@ export async function POST(request: NextRequest) {
 
     if (action === 'request') {
       // Handle password reset request
-      const validation = resetRequestSchema.safeParse(body);
-      if (!validation.success) {
+      const validationErrors = validateEmailData(body);
+      if (validationErrors.length > 0) {
         return NextResponse.json(
-          { 
-            error: 'Validation failed', 
-            details: validation.error.errors.map(err => ({
-              field: err.path.join('.'),
-              message: err.message
-            }))
+          {
+            error: 'Validation failed',
+            details: validationErrors
           },
           { status: 400 }
         );
       }
 
-      const { email } = validation.data;
+      const { email } = body;
 
       // Check if user exists (but don't reveal this information for security)
       const { data: user } = await supabase
@@ -77,21 +97,18 @@ export async function POST(request: NextRequest) {
 
     } else if (action === 'update') {
       // Handle password update
-      const validation = resetPasswordSchema.safeParse(body);
-      if (!validation.success) {
+      const validationErrors = validatePasswordData(body);
+      if (validationErrors.length > 0) {
         return NextResponse.json(
-          { 
-            error: 'Validation failed', 
-            details: validation.error.errors.map(err => ({
-              field: err.path.join('.'),
-              message: err.message
-            }))
+          {
+            error: 'Validation failed',
+            details: validationErrors
           },
           { status: 400 }
         );
       }
 
-      const { password } = validation.data;
+      const { password } = body;
 
       // Update password using Supabase Auth
       const { data, error } = await supabase.auth.updateUser({

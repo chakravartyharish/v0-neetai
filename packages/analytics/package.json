@@ -7,6 +7,11 @@
     ".": "./index.ts",
     "./services": "./services/index.ts"
   },
+  "scripts": {
+    "build": "echo 'TypeScript package - no build needed'",
+    "lint": "echo 'No lint script for now'",
+    "check-types": "echo 'No type check script for now'"
+  },
   "dependencies": {
     "@vercel/analytics": "^1.1.0",
     "@neet/database": "*",

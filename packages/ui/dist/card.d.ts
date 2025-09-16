@@ -1,7 +1,8 @@
 import { type ReactNode } from "react";
-export declare function Card({ title, children, href, }: {
+export declare function Card({ title, children, href, className, }: {
     title: string;
     children: ReactNode;
     href: string;
+    className?: string;
 }): import("react/jsx-runtime").JSX.Element;
 //# sourceMappingURL=card.d.ts.map
