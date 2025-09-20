@@ -7,15 +7,6 @@
       "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --ui-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
-    --ui-spacing: 0.25rem;
-    --ui-text-sm: 0.875rem;
-    --ui-text-sm--line-height: calc(1.25 / 0.875);
-    --ui-text-2xl: 1.5rem;
-    --ui-text-2xl--line-height: calc(2 / 1.5);
-    --ui-font-weight-semibold: 600;
-    --ui-radius-lg: 0.5rem;
-    --ui-default-transition-duration: 150ms;
-    --ui-default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     --ui-default-font-family: var(--ui-font-sans);
     --ui-default-mono-font-family: var(--ui-font-mono);
   }
@@ -172,54 +163,11 @@
   .ui\:absolute {
     position: absolute;
   }
-  .ui\:m-0 {
-    margin: calc(var(--ui-spacing) * 0);
-  }
-  .ui\:mb-3 {
-    margin-bottom: calc(var(--ui-spacing) * 3);
-  }
-  .ui\:inline-block {
-    display: inline-block;
-  }
-  .ui\:max-w-\[30ch\] {
-    max-width: 30ch;
-  }
   .ui\:rounded-\[100\%\] {
     border-radius: 100%;
   }
-  .ui\:rounded-lg {
-    border-radius: var(--ui-radius-lg);
-  }
-  .ui\:border {
-    border-style: var(--tw-border-style);
-    border-width: 1px;
-  }
-  .ui\:border-transparent {
-    border-color: transparent;
-  }
   .ui\:bg-\[conic-gradient\(from_180deg_at_50\%_50\%\,var\(--red-1000\)_0deg\,_var\(--purple-1000\)_180deg\,_var\(--blue-1000\)_360deg\)\] {
     background-image: conic-gradient(from 180deg at 50% 50%,var(--red-1000) 0deg, var(--purple-1000) 180deg, var(--blue-1000) 360deg);
-  }
-  .ui\:px-5 {
-    padding-inline: calc(var(--ui-spacing) * 5);
-  }
-  .ui\:py-4 {
-    padding-block: calc(var(--ui-spacing) * 4);
-  }
-  .ui\:text-2xl {
-    font-size: var(--ui-text-2xl);
-    line-height: var(--tw-leading, var(--ui-text-2xl--line-height));
-  }
-  .ui\:text-sm {
-    font-size: var(--ui-text-sm);
-    line-height: var(--tw-leading, var(--ui-text-sm--line-height));
-  }
-  .ui\:font-semibold {
-    --tw-font-weight: var(--ui-font-weight-semibold);
-    font-weight: var(--ui-font-weight-semibold);
-  }
-  .ui\:opacity-50 {
-    opacity: 50%;
   }
   .ui\:mix-blend-normal {
     mix-blend-mode: normal;
@@ -232,28 +180,9 @@
     --tw-blur: blur(75px);
     filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
   }
-  .ui\:transition-colors {
-    transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to;
-    transition-timing-function: var(--tw-ease, var(--ui-default-transition-timing-function));
-    transition-duration: var(--tw-duration, var(--ui-default-transition-duration));
-  }
-  .ui\:transition-transform {
-    transition-property: transform, translate, scale, rotate;
-    transition-timing-function: var(--tw-ease, var(--ui-default-transition-timing-function));
-    transition-duration: var(--tw-duration, var(--ui-default-transition-duration));
-  }
   .ui\:will-change-\[filter\] {
     will-change: filter;
   }
-}
-@property --tw-border-style {
-  syntax: "*";
-  inherits: false;
-  initial-value: solid;
-}
-@property --tw-font-weight {
-  syntax: "*";
-  inherits: false;
 }
 @property --tw-blur {
   syntax: "*";
@@ -311,8 +240,6 @@
 @layer properties {
   @supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))) {
     *, ::before, ::after, ::backdrop {
-      --tw-border-style: solid;
-      --tw-font-weight: initial;
       --tw-blur: initial;
       --tw-brightness: initial;
       --tw-contrast: initial;

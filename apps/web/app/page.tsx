@@ -38,18 +38,30 @@ const STATS = [
 
 export default function Page() {
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <main className="min-h-screen bg-slate-950">
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
+      <div className="relative overflow-hidden min-h-screen">
+        {/* Enhanced Background Effects */}
         <div className="absolute inset-0">
-          <Gradient
-            className="opacity-30 w-[1000px] h-[1000px] top-[-200px] left-1/2 transform -translate-x-1/2"
-            conic
-          />
-        </div>
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-950 to-slate-900"></div>
 
-        {/* Background Pattern */}
-        <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+          {/* Primary gradient orbs */}
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-blue-500/30 to-purple-600/30 rounded-full mix-blend-screen filter blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gradient-to-br from-cyan-500/30 to-blue-600/30 rounded-full mix-blend-screen filter blur-3xl animate-pulse"></div>
+          <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-gradient-to-br from-purple-500/20 to-pink-600/20 rounded-full mix-blend-screen filter blur-2xl animate-pulse"></div>
+
+          {/* Secondary accent orbs */}
+          <div className="absolute top-20 left-20 w-32 h-32 bg-gradient-to-br from-yellow-400/40 to-orange-500/40 rounded-full mix-blend-screen filter blur-xl animate-pulse"></div>
+          <div className="absolute bottom-32 right-32 w-40 h-40 bg-gradient-to-br from-green-400/30 to-emerald-500/30 rounded-full mix-blend-screen filter blur-xl animate-pulse"></div>
+
+          {/* Floating particles */}
+          <div className="absolute inset-0">
+            <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-white/50 rounded-full animate-ping"></div>
+            <div className="absolute top-3/4 left-3/4 w-1 h-1 bg-blue-400/70 rounded-full animate-ping" style={{animationDelay: '1s'}}></div>
+            <div className="absolute top-1/2 left-1/3 w-1.5 h-1.5 bg-purple-400/60 rounded-full animate-ping" style={{animationDelay: '2s'}}></div>
+            <div className="absolute top-1/5 right-1/4 w-1 h-1 bg-cyan-400/60 rounded-full animate-ping" style={{animationDelay: '3s'}}></div>
+          </div>
+        </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-32">
           {/* Navigation */}
