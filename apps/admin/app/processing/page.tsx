@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Button } from '@repo/ui/button';
+import { Button } from '@neet/ui/button';
 
 interface ProcessingJob {
   id: string;

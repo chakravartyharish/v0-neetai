@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Button } from '@repo/ui/button';
+import { Button } from '@neet/ui/button';
 
 interface MockQuestion {
   id: string;

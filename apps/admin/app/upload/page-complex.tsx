@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
-import { Button } from '@repo/ui/button';
+import { Button } from '@neet/ui/button';
 import { validateFiles, validateFileHeader, getSecurityConfig, type FileValidationResult } from '../../lib/utils/file-validation';
 
 interface UploadFile {
