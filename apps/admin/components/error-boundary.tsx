@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Button } from '@repo/ui/button';
+import { Button } from '@neet/ui/button';
 
 interface ErrorBoundaryState {
   hasError: boolean;

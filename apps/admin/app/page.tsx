@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Button } from '@repo/ui/button';
+import { Button } from '@neet/ui/button';
 import { createClient } from '@supabase/supabase-js';
 
 export default function AdminDashboard() {

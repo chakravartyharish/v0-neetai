@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '@repo/ui/button';
+import { Button } from '@neet/ui/button';
 import { useAuth } from '@neet/auth';
 
 export default function UnauthorizedPage() {

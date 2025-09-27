@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@repo/ui/button';
+import { Button } from '@neet/ui/button';
 // Using HTML entities and emojis instead of lucide-react
 
 export default function ProfilePage() {

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Button } from '@repo/ui/button';
+import { Button } from '@neet/ui/button';
 
 export default function UploadPage() {
   const [dragActive, setDragActive] = useState(false);

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button } from '@repo/ui/button';
+import { Button } from '@neet/ui/button';
 
 export default function SettingsPage() {
   const router = useRouter();
