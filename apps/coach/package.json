@@ -82,7 +82,7 @@
     "prettier": "^3.0.0",
     "@next/bundle-analyzer": "^14.0.0",
     "patch-package": "^8.0.0",
-    "@lhci/cli": "^0.13.0",
+    "@lhci/cli": "^0.15.1",
     "axe-core": "^4.8.0",
     "jest-axe": "^8.0.0"
   }
