@@ -51,7 +51,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.1.5",
-    "tsx": "^4.7.1",
+    "tsx": "^4.22.4",
     "typescript": "5.9.2"
   }
 }
