@@ -14,7 +14,7 @@
     "check-types": "echo 'No type check script for now'"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^0.0.0",
+    "@ai-sdk/openai": "^4.0.37",
     "@neet/config": "*",
     "@neet/database": "*",
     "ai": "^3.4.33",
