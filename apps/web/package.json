@@ -19,7 +19,7 @@
     "@neet/database": "*",
     "@neet/ui": "*",
     "@vercel/analytics": "^1.1.0",
-    "@vercel/blob": "^0.15.0",
+    "@vercel/blob": "^2.8.1",
     "@vercel/kv": "^1.0.0",
     "@vercel/speed-insights": "^1.0.0",
     "ai": "^3.0.0",
