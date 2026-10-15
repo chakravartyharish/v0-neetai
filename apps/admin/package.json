@@ -23,7 +23,7 @@
     "@neet/config": "*",
     "@neet/database": "*",
     "@repo/ui": "*",
-    "next": "^15.5.3",
+    "next": "^15.5.27",
     "pdf2json": "^3.1.5",
     "pdf2pic": "^2.2.0",
     "react": "^19.1.1",
